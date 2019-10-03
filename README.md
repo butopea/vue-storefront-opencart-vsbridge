@@ -1,6 +1,4 @@
 # Vue-Storefront Connector Extension for OpenCart
-Vue-Storefront Connector Extension for OpenCart
-
 **Compatible with: OpenCart 2.3.0.2**
 
 **API Base URL:** `https://site_url/vsbridge/`
