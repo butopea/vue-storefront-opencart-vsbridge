@@ -1,4 +1,4 @@
-# Vue-Storefront Connector Extension for OpenCart
+# Vue Storefront Connector Extension for OpenCart
 **Compatible with: OpenCart 2.3.0.2**
 
 **API Base URL:** `https://site_url/vsbridge/`
@@ -26,3 +26,16 @@ location /vsbridge {
 
 * Edit `tests/test.php` and add the credentials and settings
 * Run `php tests/test.php`
+
+**Credits:**
+
+Made with ❤ by [Butopêa](https://butopea.com)
+
+**Support:**
+
+
+Please ask your questions regarding this extension on Vue Storefront's Slack https://vuestorefront.slack.com/ You can join via [this invitation link]().
+
+**License:**
+
+This extension is completely free and released under the MIT License.
