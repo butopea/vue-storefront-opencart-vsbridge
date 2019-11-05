@@ -7,14 +7,31 @@
 
 - Username: OC API Name
 - Password: OC API Key
-- Secret Key: Must be generated in VC Bridge module settings
+- Secret Key: Must be generated in VS Bridge module settings
 - Token Format: JWT
 
 **Installation:**
 
-* Add this composer package to your OpenCart project (extension files will be automatically copied):
-```composer require ...```
-* Add the URL rewrite rule for VSBridge (nginx example):
+* Run the following command to add the required composer packages, including the VS Bridge itself:
+```bash
+composer require butopea/vue-storefront-opencart-vsbridge
+```
+* Add the following line in the extra section of your OpenCart's composer.json:
+
+**Make sure to change the destination folder to match your upload/public folder.**
+```json
+"extra": {
+        "filescopier": [
+            {
+                "source": "vendor/butopea/vue-storefront-opencart-vsbridge/src",
+                "destination": "upload",
+                "debug": "true"
+            }
+        ]
+    }    
+```
+
+* Add the URL rewrite rule for VS Bridge (Nginx example):
 ```nginx
 location /vsbridge {
     rewrite ^/(.+)$ /index.php?route=$1 last;

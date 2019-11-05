@@ -1,0 +1,20 @@
+{
+  "name": "butopea/vue-storefront-opencart-vsbridge",
+  "type": "opencart-extension",
+  "description": "Vue Storefront Connector Extension for OpenCart",
+  "keywords": ["vue-storefront", "opencart", "vsbridge"],
+  "homepage": "https://github.com/butopea",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mohammad Tomaraei",
+      "email": "themreza@gmail.com",
+      "homepage": "https://github.com/themreza",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "rbdwllr/reallysimplejwt": "2.0.2",
+    "sasedev/composer-plugin-filecopier": "^1.1"
+  }
+}
