@@ -15,6 +15,7 @@
   ],
   "require": {
     "rbdwllr/reallysimplejwt": "2.0.2",
+    "voku/urlify": "5.0.2",
     "sasedev/composer-plugin-filecopier": "^1.1"
   }
 }
