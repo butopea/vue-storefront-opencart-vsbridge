@@ -12,10 +12,6 @@
 
 **Installation:**
 
-* Run the following command to add the required composer packages, including the VS Bridge itself:
-```bash
-composer require butopea/vue-storefront-opencart-vsbridge
-```
 * Add the following line in the extra section of your OpenCart's composer.json:
 
 **Make sure to change the destination folder to match your upload/public folder.**
@@ -29,6 +25,11 @@ composer require butopea/vue-storefront-opencart-vsbridge
             }
         ]
     }    
+```
+
+* Run the following command to add the required composer packages, including the VS Bridge itself:
+```bash
+composer require butopea/vue-storefront-opencart-vsbridge
 ```
 
 * Add the URL rewrite rule for VS Bridge (Nginx example):
