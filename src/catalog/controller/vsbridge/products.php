@@ -90,6 +90,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
         $page = (int) $this->getParam('page');
 
         $this->load->model('vsbridge/api');
+        $this->load->model('catalog/product');
 
         $filter_data = array(
             'start'                  => ($page - 1) * $pageSize,

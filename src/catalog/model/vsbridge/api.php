@@ -32,9 +32,14 @@ class ModelVsbridgeApi extends Model {
 
     // OpenCart Extension [Seo BackPack 2.9.1]
     public function getSeoUrlAlias($type, $type_id, $language_id){
-      $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url_alias` WHERE `query` = '".$this->db->escape($type)."_id=".(int) $type_id."' AND `language_id` = '".(int) $language_id."' ORDER BY `id` DESC");
+        $check_table = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "seo_url_alias'");
 
-      return $query->row;
+        if ($check_table->num_rows) {
+            $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url_alias` WHERE `query` = '" . $this->db->escape($type) . "_id=" . (int)$type_id . "' AND `language_id` = '" . (int)$language_id . "' ORDER BY `id` DESC");
+            return $query->row;
+        }else{
+            return false;
+        }
     }
 
     // Native OpenCart URL aliases (doesn't support multiple languages)

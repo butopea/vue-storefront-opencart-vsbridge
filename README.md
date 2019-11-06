@@ -40,7 +40,7 @@ location /vsbridge {
 ```
 * Install the extension in OpenCart (Extensions -> Modules) and generate a secret key
 
-* Get the [Vue Storefront OpenCart Indexer](https://github.com/butopea/vue-storefront-indexer) to import your data into ElasticSearch.
+* Get the [Vue Storefront OpenCart Indexer](https://github.com/butopea/vue-storefront-opencart-indexer) to import your data into ElasticSearch.
 
 *You need to whitelist your indexer's IP address in OpenCart at oc_url/admin/index.php?route=user/api*
 
