@@ -44,15 +44,15 @@ class ModelVsbridgeApi extends Model {
 
     // Native OpenCart URL aliases (doesn't support multiple languages)
     public function getUrlAlias($type, $type_id){
-      $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "url_alias` WHERE `query` = '".$this->db->escape($type)."_id=".(int) $type_id."' ORDER BY `url_alias_id` DESC");
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "url_alias` WHERE `query` = '".$this->db->escape($type)."_id=".(int) $type_id."' ORDER BY `url_alias_id` DESC");
 
-      return $query->row;
+        return $query->row;
     }
 
     public function getStoreConfig($config_name, $store_id){
-      $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "setting` WHERE `store_id` = '".(int) $store_id."' AND `key` = '".$this->db->escape($config_name)."'");
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "setting` WHERE `store_id` = '".(int) $store_id."' AND `key` = '".$this->db->escape($config_name)."'");
 
-      return $query->row;
+        return $query->row;
     }
 
     public function countCategoryProducts($category_id){
@@ -104,15 +104,15 @@ class ModelVsbridgeApi extends Model {
     }
 
     public function getProductSpecialPrice($product_id, $group_id){
-      $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_special` WHERE `product_id` = '" . (int) $product_id . "' AND customer_group_id = '" . (int)$group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW()))");
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_special` WHERE `product_id` = '" . (int) $product_id . "' AND customer_group_id = '" . (int)$group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW()))");
 
-      return $query->row;
+        return $query->row;
     }
 
     public function getProductDiscountsForGroup($product_id, $group_id) {
-          $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
 
-          return $query->rows;
+        return $query->rows;
     }
 
     public function getProductCategories($product_id){
@@ -145,6 +145,12 @@ class ModelVsbridgeApi extends Model {
         return $query->rows;
     }
 
+    public function getProductDiscounts($product_id, $customer_group_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
+
+        return $query->rows;
+    }
+
     public function getProductImages($product_id){
         $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_image` WHERE product_id = '".(int) $product_id."' ORDER BY sort_order ASC");
 
@@ -153,6 +159,12 @@ class ModelVsbridgeApi extends Model {
 
     public function getProductBySku($sku, $language_id){
         $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_description` AS tproddesc INNER JOIN `" . DB_PREFIX . "product` AS tprod ON tproddesc.product_id = tprod.product_id WHERE tprod.sku = '". $this->db->escape($sku)."' AND tproddesc.language_id = '".(int) $language_id."'");
+
+        return $query->row;
+    }
+
+    public function getProductIdFromSku($sku){
+        $query = $this->db->query("SELECT product_id FROM `" . DB_PREFIX . "product` WHERE sku = '". $this->db->escape($sku)."'");
 
         return $query->row;
     }
@@ -262,19 +274,19 @@ class ModelVsbridgeApi extends Model {
         if(!empty($data)){
             $update_array = array();
 
-                if(isset($data['field']) && isset($data['value']) && isset($data['type'])){
-                    switch($data['type']){
-                        default:
-                        case 'string':
-                            $data['value'] = $this->db->escape($data['value']);
-                            break;
-                        case 'integer':
-                            $data['value'] = (int) $data['value'];
-                            break;
-                    }
-
-                    array_push($update_array, $data['field']." = '".$data['value']."'");
+            if(isset($data['field']) && isset($data['value']) && isset($data['type'])){
+                switch($data['type']){
+                    default:
+                    case 'string':
+                        $data['value'] = $this->db->escape($data['value']);
+                        break;
+                    case 'integer':
+                        $data['value'] = (int) $data['value'];
+                        break;
                 }
+
+                array_push($update_array, $data['field']." = '".$data['value']."'");
+            }
 
             $this->db->query("UPDATE `" . DB_PREFIX . "customer` SET ".implode(',', $update_array)." WHERE customer_id = '" . (int)$customer_id . "'");
         }
