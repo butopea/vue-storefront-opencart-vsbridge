@@ -300,6 +300,18 @@ class ControllerVsbridgeProducts extends VsbridgeController{
 
                     $product_array['tier_prices'] = $tier_prices;
 
+                    // TODO: Change 1 and 0 to true and false when https://github.com/DivanteLtd/vue-storefront/issues/3800 is solved
+                    // Add the 'new' label if the product was added 30 days ago or less
+                    $time = time();
+                    $max_days_for_new = 30;
+                    $date1 = strtotime($product['date_available']);
+                    $date2 = strtotime($product['date_added']);
+                    $is_new = $max_days_for_new > ($time - ($date1 > $date2 ? $date1 : $date2)) / 86400;
+                    $product_array['new'] = $is_new ? '1' : '0';
+
+                    // Add the 'sale' label if the product is on sale
+                    $product_array['sale'] = isset($special_price_incl_tax) ? '1' : '0';
+
                     array_push($response, $product_array);
                 }
             }

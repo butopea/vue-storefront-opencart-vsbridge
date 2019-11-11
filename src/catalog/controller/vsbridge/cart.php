@@ -210,31 +210,40 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
                     if(!empty($product_info)){
 
-                        if(isset($input['cartItem']['item_id'])){
-                            $this->cart->update($input['cartItem']['item_id'], $input['cartItem']['qty']);
-                        }else{
-                            $this->cart->add($product_info['product_id'], $input['cartItem']['qty']);
-                        }
+                        // Check if the requested quantity is available on the selected product
+                        if(intval($input['cartItem']['qty']) <= intval($product_info['quantity'])){
 
-                        $cart_products = $this->cart->getProducts();
-
-                        $response = array();
-
-                        foreach($cart_products as $cart_product){
-                            if($cart_product['product_id'] == $product_info['product_id']){
-                                $response = array(
-                                    'item_id' => (int) $cart_product['cart_id'],
-                                    'sku' => $cart_product['model'],
-                                    'qty' => (int) $cart_product['quantity'],
-                                    'name' => $cart_product['name'],
-                                    'price' => (float) $cart_product['price'],
-                                    'product_type' => 'simple',
-                                    'quote_id' => $cart_id
-                                );
+                            if(isset($input['cartItem']['item_id'])){
+                                $this->cart->update($input['cartItem']['item_id'], $input['cartItem']['qty']);
+                            }else{
+                                $this->cart->add($product_info['product_id'], $input['cartItem']['qty']);
                             }
-                        }
 
-                        $this->result = $response;
+                            $cart_products = $this->cart->getProducts();
+
+                            $response = array();
+
+                            foreach($cart_products as $cart_product){
+                                if($cart_product['product_id'] == $product_info['product_id']){
+                                    $response = array(
+                                        'item_id' => (int) $cart_product['cart_id'],
+                                        'sku' => $cart_product['model'],
+                                        'qty' => (int) $cart_product['quantity'],
+                                        'name' => $cart_product['name'],
+                                        'price' => (float) $cart_product['price'],
+                                        'product_type' => 'simple',
+                                        'quote_id' => $cart_id
+                                    );
+                                }
+                            }
+
+                            $this->result = $response;
+
+                        }else{
+                            $this->load->language('vsbridge/api');
+                            $this->code = 500;
+                            $this->result = $this->language->get('error_out_of_stock').' ['.$product_info['model'].'] '.$product_info['name'];
+                        }
 
                     }else{
                         $this->load->language('vsbridge/api');
@@ -503,20 +512,20 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
             /* Currently we don't calculate per-product tax/discount. Instead OpenCart calculates the cart total tax */
             foreach($cart_products as $cart_product){
-                    array_push($cart_items, array(
-                        'item_id' => (int) $cart_product['cart_id'],
-                        'price' => (float) $cart_product['price'],
-                        'base_price' => (float) $cart_product['price'],
-                        'qty' => (int) $cart_product['quantity'],
-                        'row_total' => (float) $cart_product['total'],
-                        'base_row_total' => (float) $cart_product['total'],
-                        'row_total_with_discount' => (float) $cart_product['total'],
-                        'tax_amount' => 0,
-                        'discount_amount' => 0,
-                        'base_discount_amount' => 0,
-                        'discount_percent' => 0,
-                        'name' => $cart_product['name'],
-                    ));
+                array_push($cart_items, array(
+                    'item_id' => (int) $cart_product['cart_id'],
+                    'price' => (float) $cart_product['price'],
+                    'base_price' => (float) $cart_product['price'],
+                    'qty' => (int) $cart_product['quantity'],
+                    'row_total' => (float) $cart_product['total'],
+                    'base_row_total' => (float) $cart_product['total'],
+                    'row_total_with_discount' => (float) $cart_product['total'],
+                    'tax_amount' => 0,
+                    'discount_amount' => 0,
+                    'base_discount_amount' => 0,
+                    'discount_percent' => 0,
+                    'name' => $cart_product['name'],
+                ));
             }
 
             $response = array(
@@ -826,69 +835,69 @@ class ControllerVsbridgeCart extends VsbridgeController{
         $input = $this->getPost();
 
         if($this->validateCartId($cart_id, $token)) {
-                // Delete old shipping method so not to cause any issues if there is an error
-                unset($this->session->data['shipping_method']);
+            // Delete old shipping method so not to cause any issues if there is an error
+            unset($this->session->data['shipping_method']);
 
-                $this->load->language('api/shipping');
+            $this->load->language('api/shipping');
 
-                if ($this->cart->hasShipping()) {
-                    // Shipping Address
-                    if (!isset($this->session->data['shipping_address'])) {
-                        $this->code = 500;
-                        $this->result = $this->language->get('error_address');
-                    }
+            if ($this->cart->hasShipping()) {
+                // Shipping Address
+                if (!isset($this->session->data['shipping_address'])) {
+                    $this->code = 500;
+                    $this->result = $this->language->get('error_address');
+                }
 
-                    // Shipping Method
-                    if (empty($this->session->data['shipping_methods'])) {
-                        $this->code = 500;
-                        $this->result = $this->language->get('error_no_shipping');
-                    } elseif (!isset($input['addressInformation']['shippingMethodCode'])) {
+                // Shipping Method
+                if (empty($this->session->data['shipping_methods'])) {
+                    $this->code = 500;
+                    $this->result = $this->language->get('error_no_shipping');
+                } elseif (!isset($input['addressInformation']['shippingMethodCode'])) {
+                    $this->code = 500;
+                    $this->result = $this->language->get('error_method');
+                } else {
+                    $shipping = explode('.', $input['addressInformation']['shippingMethodCode']);
+
+                    if (!isset($shipping[0]) || !isset($shipping[1]) || !isset($this->session->data['shipping_methods'][$shipping[0]]['quote'][$shipping[1]])) {
                         $this->code = 500;
                         $this->result = $this->language->get('error_method');
-                    } else {
-                        $shipping = explode('.', $input['addressInformation']['shippingMethodCode']);
-
-                        if (!isset($shipping[0]) || !isset($shipping[1]) || !isset($this->session->data['shipping_methods'][$shipping[0]]['quote'][$shipping[1]])) {
-                            $this->code = 500;
-                            $this->result = $this->language->get('error_method');
-                        }
                     }
-
-                    if (!$this->result) {
-                        $this->session->data['shipping_method'] = $this->session->data['shipping_methods'][$shipping[0]]['quote'][$shipping[1]];
-
-                        $cart_products = $this->cart->getProducts();
-
-                        $cart_items = array();
-
-                        /* Currently we don't calculate per-product tax/discount. Instead OpenCart calculates the cart total tax */
-                        foreach($cart_products as $cart_product){
-                            array_push($cart_items, array(
-                                'item_id' => (int) $cart_product['cart_id'],
-                                'price' => (float) $cart_product['price'],
-                                'base_price' => (float) $cart_product['price'],
-                                'qty' => (int) $cart_product['quantity'],
-                                'row_total' => (float) $cart_product['total'],
-                                'base_row_total' => (float) $cart_product['total'],
-                                'row_total_with_discount' => (float) $cart_product['total'],
-                                'tax_amount' => 0,
-                                'discount_amount' => 0,
-                                'base_discount_amount' => 0,
-                                'discount_percent' => 0,
-                                'name' => $cart_product['name'],
-                            ));
-                        }
-
-                        $this->result = array(
-                            'items' => $cart_items,
-                            'message' => $this->language->get('text_method')
-                        );
-                    }
-                } else {
-                    unset($this->session->data['shipping_address']);
-                    unset($this->session->data['shipping_method']);
-                    unset($this->session->data['shipping_methods']);
                 }
+
+                if (!$this->result) {
+                    $this->session->data['shipping_method'] = $this->session->data['shipping_methods'][$shipping[0]]['quote'][$shipping[1]];
+
+                    $cart_products = $this->cart->getProducts();
+
+                    $cart_items = array();
+
+                    /* Currently we don't calculate per-product tax/discount. Instead OpenCart calculates the cart total tax */
+                    foreach($cart_products as $cart_product){
+                        array_push($cart_items, array(
+                            'item_id' => (int) $cart_product['cart_id'],
+                            'price' => (float) $cart_product['price'],
+                            'base_price' => (float) $cart_product['price'],
+                            'qty' => (int) $cart_product['quantity'],
+                            'row_total' => (float) $cart_product['total'],
+                            'base_row_total' => (float) $cart_product['total'],
+                            'row_total_with_discount' => (float) $cart_product['total'],
+                            'tax_amount' => 0,
+                            'discount_amount' => 0,
+                            'base_discount_amount' => 0,
+                            'discount_percent' => 0,
+                            'name' => $cart_product['name'],
+                        ));
+                    }
+
+                    $this->result = array(
+                        'items' => $cart_items,
+                        'message' => $this->language->get('text_method')
+                    );
+                }
+            } else {
+                unset($this->session->data['shipping_address']);
+                unset($this->session->data['shipping_method']);
+                unset($this->session->data['shipping_methods']);
+            }
         }
 
         $this->sendResponse();
