@@ -247,7 +247,7 @@ class ControllerVsbridgeProduct extends VsbridgeController{
         $adjusted_products = array();
 
         foreach($populated_products as $populated_product){
-            $customer_group_prices = $this->model_vsbridge_api->getProductDiscounts($populated_product['id'], $customer_group_id);
+            $customer_group_prices = $this->model_vsbridge_api->getProductDiscountsByCustomerGroup($populated_product['id'], $customer_group_id);
 
             if(!empty($customer_group_prices[0]['price'])){
                 $new_final_price = $this->currency->format($this->tax->calculate($customer_group_prices[0]['price'], $populated_product['tax_class_id'], $this->config->get('config_tax')), $this->config->get('config_currency'), NULL, FALSE);

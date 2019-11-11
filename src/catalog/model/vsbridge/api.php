@@ -109,16 +109,50 @@ class ModelVsbridgeApi extends Model {
         return $query->row;
     }
 
-    public function getProductDiscountsForGroup($product_id, $group_id) {
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
-
-        return $query->rows;
-    }
-
     public function getProductCategories($product_id){
         $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_category` WHERE product_id = '".(int) $product_id."'");
 
         return $query->rows;
+    }
+
+    // For use with the Advanced Product Variant extension
+    public function getProductVariants($product_id, $language_id){
+        $check_table = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "variantproducts'");
+
+        if ($check_table->num_rows) {
+
+            $query = $this->db->query("
+					SELECT vd.title, (SELECT GROUP_CONCAT(v2p.product_id) FROM " . DB_PREFIX . "variantproducts_to_product v2p WHERE v.variantproduct_id = v2p.variantproduct_id ) prodIds
+					FROM " . DB_PREFIX . "variantproducts v
+					LEFT JOIN " . DB_PREFIX . "variantproducts_description vd ON (v.variantproduct_id = vd.variantproduct_id)
+					LEFT JOIN " . DB_PREFIX . "variantproducts_to_product v2p ON (v.variantproduct_id = v2p.variantproduct_id)
+					WHERE
+					    v2p.product_id = '" . (int)$product_id . "' AND
+					    vd.language_id = '" . (int)$language_id . "' AND
+					    v.status = '1'
+					ORDER BY v.sort_order, v.variantproduct_id ASC
+					");
+
+            $product_variant_ids = array();
+
+            foreach($query->rows as $product_variants){
+                if(!empty($product_variants['prodIds'])){
+                    $product_ids = explode(',', $product_variants['prodIds']);
+
+                    if(is_array($product_ids)){
+                        foreach($product_ids as $pid){
+                            if(!in_array($pid, $product_variant_ids) && $pid != $product_id){
+                                array_push($product_variant_ids, $pid);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return $product_variant_ids;
+        }else{
+            return false;
+        }
     }
 
     public function getCategoryDetails($category_id, $language_id){
@@ -145,8 +179,14 @@ class ModelVsbridgeApi extends Model {
         return $query->rows;
     }
 
-    public function getProductDiscounts($product_id, $customer_group_id) {
+    public function getProductDiscountsByCustomerGroup($product_id, $customer_group_id){
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
+
+        return $query->rows;
+    }
+
+    public function getProductDiscounts($product_id){
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
 
         return $query->rows;
     }

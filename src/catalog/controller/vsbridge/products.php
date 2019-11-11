@@ -264,6 +264,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         $product_array['url_path'] = $seo_url_alias['keyword'];
                     }
 
+                    // Related products
                     $related_products = $this->model_vsbridge_api->getRelatedProducts($product['product_id']);
                     $related_product_ids = array();
 
@@ -276,6 +277,28 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                     }
 
                     $product_array['related_products'] = $related_product_ids;
+
+                    // Product variants (only if Advanced Product Variants extension is installed)
+                    $product_variant_ids = $this->model_vsbridge_api->getProductVariants($product['product_id'], $this->language_id);
+
+                    if(!empty($product_variant_ids)){
+                        $product_array['product_variants'] = $product_variant_ids;
+                    }
+
+                    // Load product discounts (tier prices)
+                    $product_discounts = $this->model_vsbridge_api->getProductDiscounts($product['product_id']);
+
+                    $tier_prices = array();
+
+                    foreach($product_discounts as $product_discount){
+                        array_push($tier_prices, array(
+                            'customer_group_id' => (int) $product_discount['customer_group_id'],
+                            'qty' => (int) $product_discount['quantity'],
+                            'value' => $this->currency->format($this->tax->calculate($product_discount['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->config->get('config_currency'), NULL, FALSE)
+                        ));
+                    }
+
+                    $product_array['tier_prices'] = $tier_prices;
 
                     array_push($response, $product_array);
                 }
