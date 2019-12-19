@@ -23,6 +23,8 @@ abstract class VsbridgeController extends Controller {
     {
         parent::__construct($registry);
 
+        $this->checkExtensionStatus();
+        
         $this->load->model('vsbridge/api');
         
         $this->language_id = $this->getLanguageId();
@@ -38,6 +40,16 @@ abstract class VsbridgeController extends Controller {
         /* HTTP_ACCEPT_LANGUAGE fix */
         if(!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
             $_SERVER['HTTP_ACCEPT_LANGUAGE'] = '';
+        }
+    }
+
+    /* Prevent access to controllers if the extension is disabled */
+    public function checkExtensionStatus(): void
+    {
+        if((int)$this->config->get('vsbridge_status') !== 1) {
+            $this->code = 400;
+            $this->result = 'Extension disabled.';
+            $this->sendResponse();
         }
     }
 
