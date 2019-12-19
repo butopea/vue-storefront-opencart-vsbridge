@@ -358,10 +358,8 @@ class ModelVsbridgeApi extends Model {
 
         $this->db->query("INSERT INTO `" . DB_PREFIX . "address` SET customer_id = '". (int) $customer_id ."', ".implode(',', $insert_array));
 
-        if($inserted_id = $this->db->getLastId()){
-            if($default_address == true){
-                $this->db->query("UPDATE `" . DB_PREFIX . "customer` SET address_id = '". (int)$inserted_id ."' WHERE customer_id = '" . (int)$customer_id . "'");
-            }
+        if(($inserted_id = $this->db->getLastId()) && ($default_address == true)){
+            $this->db->query("UPDATE `" . DB_PREFIX . "customer` SET address_id = '". (int)$inserted_id ."' WHERE customer_id = '" . (int)$customer_id . "'");
         }
     }
 

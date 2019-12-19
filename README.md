@@ -27,6 +27,12 @@
     }    
 ```
 
+Notes about the `source` and `destination` paths:
+
+> * The destination element must be a folder. if the destination folder does not exists, it is recursively created using `mkdir($destination, 0755, true)`
+> * If the destination folder is not an absolute path, the relative path is calculated using the vendorDir path (`$project_path = \realpath($this->composer->getConfig()->get('vendor-dir').'/../').'/'`;)
+> * The source element is evaluated using the php function `\glob($source, GLOB_MARK)` and a recursive copy is made for every result of this function into the destination folder
+
 * Run the following command to add the required composer packages, including the VS Bridge itself:
 ```bash
 composer require butopea/vue-storefront-opencart-vsbridge
@@ -39,6 +45,8 @@ location /vsbridge {
 }
 ```
 * Install the extension in OpenCart (Extensions -> Modules) and generate a secret key
+
+This extension will create its own tables in the database. An overview of the database changes [can be found here](https://github.com/butopea/vue-storefront-opencart-vsbridge/blob/master/src/admin/controller/extension/module/vsbridge.php#L103).
 
 * Get the [Vue Storefront OpenCart Indexer](https://github.com/butopea/vue-storefront-opencart-indexer) to import your data into ElasticSearch.
 

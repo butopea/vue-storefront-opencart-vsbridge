@@ -4,8 +4,6 @@ require_once(DIR_SYSTEM . 'engine/vsbridgecontroller.php');
 
 class ControllerVsbridgeAuth extends VsbridgeController{
 
-    private $error = array();
-
     /*
      * POST /vsbridge/auth/admin
      * This method is used to get the admin user token used for subsequent catalog request authorization.

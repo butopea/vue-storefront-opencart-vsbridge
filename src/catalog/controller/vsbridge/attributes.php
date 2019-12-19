@@ -4,8 +4,6 @@ require_once(DIR_SYSTEM . 'engine/vsbridgecontroller.php');
 
 class ControllerVsbridgeAttributes extends VsbridgeController{
 
-    private $error = array();
-
     /*
      * GET /vsbridge/attributes/index
      * This method is used to get all the attributes from OpenCart.

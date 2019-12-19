@@ -4,8 +4,6 @@ require_once(DIR_SYSTEM . 'engine/vsbridgecontroller.php');
 
 class ControllerVsbridgeCart extends VsbridgeController{
 
-    private $error = array();
-
     public function __construct($registry){
         parent::__construct($registry);
 
@@ -61,12 +59,10 @@ class ControllerVsbridgeCart extends VsbridgeController{
          * For authenticated users, if there's a row in the cart table matching the customer_id, we will retrieve the saved session_id and not create a new one.
         */
 
-        if(!empty($token)){
-            if($customer_info = $this->validateCustomerToken($token)){
-                /* Authenticated customer */
-                $this->load->model('vsbridge/api');
-                $cart_id = $this->getSessionId($customer_info['customer_id']);
-            }
+        if(!empty($token) && $customer_info = $this->validateCustomerToken($token)){
+            /* Authenticated customer */
+            $this->load->model('vsbridge/api');
+            $cart_id = $this->getSessionId($customer_info['customer_id']);
         }else{
             /* Guest */
             $cart_id = $this->getSessionId();
@@ -112,17 +108,17 @@ class ControllerVsbridgeCart extends VsbridgeController{
                     if(isset($cart_product['product_id']) && isset($cart_product['quantity'])){
                         $product_info = $this->model_vsbridge_api->getProductDetails($cart_product['product_id'], $this->language_id);
                         if (!$cart_product['stock']) {
-                            array_push($out_of_stock_products, $product_info['model']);
+                            $out_of_stock_products[] = $product_info['model'];
                         }
-                        array_push($response, array(
-                            'item_id' => (int) $cart_product['cart_id'],
+                        $response[] = array(
+                            'item_id' => (int)$cart_product['cart_id'],
                             'sku' => $product_info['sku'],
-                            'qty' => (int) $cart_product['quantity'],
+                            'qty' => (int)$cart_product['quantity'],
                             'name' => $product_info['name'],
-                            'price' => (float) $product_info['price'],
+                            'price' => (float)$product_info['price'],
                             'product_type' => 'simple',
                             'quote_id' => $cart_id
-                        ));
+                        );
                     }
                 }
             }
@@ -469,39 +465,39 @@ class ControllerVsbridgeCart extends VsbridgeController{
             foreach ($totals as $key => $value) {
                 switch($value['code']){
                     case 'sub_total':
-                        array_push($cart_totals, array(
+                        $cart_totals[] = array(
                             'code' => 'subtotal',
                             'title' => $value['title'],
-                            'value' => (float) $value['value']
-                        ));
+                            'value' => (float)$value['value']
+                        );
                         break;
                     case 'shipping':
-                        array_push($cart_totals, array(
+                        $cart_totals[] = array(
                             'code' => 'shipping',
                             'title' => $value['title'],
-                            'value' => (float) $value['value']
-                        ));
+                            'value' => (float)$value['value']
+                        );
                         break;
                     case 'tax':
-                        array_push($cart_totals, array(
+                        $cart_totals[] = array(
                             'code' => 'tax',
                             'title' => $value['title'],
-                            'value' => (float) $value['value']
-                        ));
+                            'value' => (float)$value['value']
+                        );
                         break;
                     case 'total':
-                        array_push($cart_totals, array(
+                        $cart_totals[] = array(
                             'code' => 'grand_total',
                             'title' => $value['title'],
-                            'value' => (float) $value['value']
-                        ));
+                            'value' => (float)$value['value']
+                        );
                         break;
                     case 'coupon':
-                        array_push($cart_totals, array(
+                        $cart_totals[] = array(
                             'code' => 'discount',
                             'title' => $value['title'],
-                            'value' => (float) $value['value']
-                        ));
+                            'value' => (float)$value['value']
+                        );
                         break;
                 }
             }
@@ -512,20 +508,20 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
             /* Currently we don't calculate per-product tax/discount. Instead OpenCart calculates the cart total tax */
             foreach($cart_products as $cart_product){
-                array_push($cart_items, array(
-                    'item_id' => (int) $cart_product['cart_id'],
-                    'price' => (float) $cart_product['price'],
-                    'base_price' => (float) $cart_product['price'],
-                    'qty' => (int) $cart_product['quantity'],
-                    'row_total' => (float) $cart_product['total'],
-                    'base_row_total' => (float) $cart_product['total'],
-                    'row_total_with_discount' => (float) $cart_product['total'],
+                $cart_items[] = array(
+                    'item_id' => (int)$cart_product['cart_id'],
+                    'price' => (float)$cart_product['price'],
+                    'base_price' => (float)$cart_product['price'],
+                    'qty' => (int)$cart_product['quantity'],
+                    'row_total' => (float)$cart_product['total'],
+                    'base_row_total' => (float)$cart_product['total'],
+                    'row_total_with_discount' => (float)$cart_product['total'],
                     'tax_amount' => 0,
                     'discount_amount' => 0,
                     'base_discount_amount' => 0,
                     'discount_percent' => 0,
                     'name' => $cart_product['name'],
-                ));
+                );
             }
 
             $response = array(
@@ -664,10 +660,10 @@ class ControllerVsbridgeCart extends VsbridgeController{
                 $adjusted_payment_methods = array();
 
                 foreach($this->session->data['payment_methods'] as $payment_method){
-                    array_push($adjusted_payment_methods, array(
+                    $adjusted_payment_methods[] = array(
                         'code' => $payment_method['code'],
                         'title' => $payment_method['title']
-                    ));
+                    );
                 }
 
                 $this->result = $adjusted_payment_methods;
@@ -704,7 +700,6 @@ class ControllerVsbridgeCart extends VsbridgeController{
     public function shipping_methods(){
         $token = $this->getParam('token', true);
         $cart_id = $this->getParam('cartId');
-        $input = $this->getPost();
 
         if($this->validateCartId($cart_id, $token)) {
             $this->load->language('api/shipping');
@@ -783,18 +778,18 @@ class ControllerVsbridgeCart extends VsbridgeController{
             $adjusted_shipping_methods = array();
 
             foreach($shipping_methods as $smkey => $smvalue){
-                array_push($adjusted_shipping_methods, array(
+                $adjusted_shipping_methods[] = array(
                     'carrier_code' => $smvalue['quote'][$smkey]['code'],
                     'method_code' => $smvalue['quote'][$smkey]['code'],
                     'carrier_title' => $smvalue['quote'][$smkey]['title'],
                     'method_title' => $smvalue['quote'][$smkey]['title'],
-                    'amount' => (float) $smvalue['quote'][$smkey]['cost'], // Using the shipping price excluding tax since the tax will be applied to the entire order
-                    'base_amount' => (float) $smvalue['quote'][$smkey]['cost'],
+                    'amount' => (float)$smvalue['quote'][$smkey]['cost'], // Using the shipping price excluding tax since the tax will be applied to the entire order
+                    'base_amount' => (float)$smvalue['quote'][$smkey]['cost'],
                     'available' => $smvalue['error'] ? false : true,
                     'error_message' => '',
-                    'price_excl_tax' => (float) $smvalue['quote'][$smkey]['cost'],
-                    'price_incl_tax' => ($smvalue['quote'][$smkey]['cost']) ? (float) $this->currency->format($this->tax->calculate($smvalue['quote'][$smkey]['cost'], (int) $smvalue['quote'][$smkey]['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false) : 0
-                ));
+                    'price_excl_tax' => (float)$smvalue['quote'][$smkey]['cost'],
+                    'price_incl_tax' => ($smvalue['quote'][$smkey]['cost']) ? (float)$this->currency->format($this->tax->calculate($smvalue['quote'][$smkey]['cost'], (int)$smvalue['quote'][$smkey]['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false) : 0
+                );
             }
 
             $this->result = $adjusted_shipping_methods;
@@ -872,20 +867,20 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
                     /* Currently we don't calculate per-product tax/discount. Instead OpenCart calculates the cart total tax */
                     foreach($cart_products as $cart_product){
-                        array_push($cart_items, array(
-                            'item_id' => (int) $cart_product['cart_id'],
-                            'price' => (float) $cart_product['price'],
-                            'base_price' => (float) $cart_product['price'],
-                            'qty' => (int) $cart_product['quantity'],
-                            'row_total' => (float) $cart_product['total'],
-                            'base_row_total' => (float) $cart_product['total'],
-                            'row_total_with_discount' => (float) $cart_product['total'],
+                        $cart_items[] = array(
+                            'item_id' => (int)$cart_product['cart_id'],
+                            'price' => (float)$cart_product['price'],
+                            'base_price' => (float)$cart_product['price'],
+                            'qty' => (int)$cart_product['quantity'],
+                            'row_total' => (float)$cart_product['total'],
+                            'base_row_total' => (float)$cart_product['total'],
+                            'row_total_with_discount' => (float)$cart_product['total'],
                             'tax_amount' => 0,
                             'discount_amount' => 0,
                             'base_discount_amount' => 0,
                             'discount_percent' => 0,
                             'name' => $cart_product['name'],
-                        ));
+                        );
                     }
 
                     $this->result = array(

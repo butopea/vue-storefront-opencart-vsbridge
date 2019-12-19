@@ -131,10 +131,8 @@ abstract class VsbridgeController extends Controller {
             }
 
             /* wrap a function around the index */
-            if(is_callable($wrapper_function)){
-                if($wrapper_function($input[$index]) == $value){
-                    return true;
-                }
+            if(is_callable($wrapper_function) && ($wrapper_function($input[$index]) == $value)){
+                return true;
             }
         }
 
@@ -334,7 +332,7 @@ abstract class VsbridgeController extends Controller {
         if(substr($cart_id, 0, 3 ) == $this->session_id_prefix){
             if(!empty($token)) {
                 if ($customer_info = $this->validateCustomerToken($token)) {
-                    $this->loadSession($this->getSessionId($customer_info['customer_id'], $this->store_id));
+                    $this->loadSession($this->getSessionId($customer_info['customer_id']));
                     return $customer_info;
                 }
             }else{

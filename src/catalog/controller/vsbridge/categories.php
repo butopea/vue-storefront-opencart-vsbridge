@@ -6,7 +6,6 @@ use voku\helper\URLify;
 
 class ControllerVsbridgeCategories extends VsbridgeController{
 
-    private $error = array();
     private $flattenedIds = array();
     private $flattenedElements = array();
     /*

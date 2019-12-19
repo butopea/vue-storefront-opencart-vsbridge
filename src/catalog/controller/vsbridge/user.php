@@ -198,7 +198,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
                 $this->load->model('account/customer');
 
                 /* Check if the current customer has an existing session, if not create a new session ID */
-                if($session_id = $this->getSessionId($customer_info['customer_id'], $this->store_id)){
+                if($session_id = $this->getSessionId($customer_info['customer_id'])){
 
                     /* Switch to the customer session */
                     $this->loadSession($session_id);
@@ -392,8 +392,6 @@ class ControllerVsbridgeUser extends VsbridgeController{
             $template = $this->model_extension_mail_template->load($template_load);
 
             if ($template) {
-                if (!empty($data)) $template->addData($data);
-
                 if (isset($input['email'])) {
                     $template->addData($input['email']);
                 }
