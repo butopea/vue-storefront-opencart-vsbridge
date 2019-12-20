@@ -28,3 +28,5 @@ $_['error_invalid_payment_code'] = 'Invalid payment code.';
 $_['error_no_payment_method'] = 'No payment method provided.';
 $_['error_cart_product_stock'] = 'Cart does not have products with valid stocks.';
 $_['error_minimum_product_quantity'] = 'You must order at least %s of %s, but the current ordered quantity is %s.';
+$_['error_extension_disabled'] = 'Extension disabled.';
+$_['error_api_endpoint_disabled'] = 'API endpoint disabled.';

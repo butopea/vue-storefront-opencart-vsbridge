@@ -24,7 +24,9 @@ abstract class VsbridgeController extends Controller {
         parent::__construct($registry);
 
         $this->checkExtensionStatus();
-        
+
+        $this->checkEndpointStatus();
+
         $this->load->model('vsbridge/api');
         
         $this->language_id = $this->getLanguageId();
@@ -44,11 +46,25 @@ abstract class VsbridgeController extends Controller {
     }
 
     /* Prevent access to controllers if the extension is disabled */
-    public function checkExtensionStatus(): void
+    public function checkExtensionStatus()
     {
         if((int)$this->config->get('vsbridge_status') !== 1) {
+            $this->load->language('vsbridge/api');
             $this->code = 400;
-            $this->result = 'Extension disabled.';
+            $this->result = $this->language->get('error_extension_disabled');
+            $this->sendResponse();
+        }
+    }
+
+    /* Prevent access to API endpoint if disabled in extension settings */
+    public function checkEndpointStatus()
+    {
+        $endpoint_name = str_replace('controllervsbridge', '', strtolower(get_class($this)));
+
+        if(empty($this->config->get('vsbridge_endpoint_statuses')[$endpoint_name])) {
+            $this->load->language('vsbridge/api');
+            $this->code = 400;
+            $this->result = $this->language->get('error_api_endpoint_disabled');
             $this->sendResponse();
         }
     }

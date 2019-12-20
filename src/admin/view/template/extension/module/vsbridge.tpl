@@ -43,13 +43,36 @@
                         <label class="col-sm-2 control-label" for="input-secret-key"><?php echo $entry_secret_key; ?><div style="font-weight: normal;"><?php echo $info_secret_key; ?></div></label>
                         <div class="col-sm-10">
                             <div class="input-group">
-                            <input type="text" name="vsbridge_secret_key" id="input_secret_key" value="<?php echo $vsbridge_secret_key; ?>" placeholder="<?php echo $entry_secret_key; ?>" id="input-secret-key" class="form-control" />
+                                <input type="text" name="vsbridge_secret_key" id="input_secret_key" value="<?php echo $vsbridge_secret_key; ?>" placeholder="<?php echo $entry_secret_key; ?>" id="input-secret-key" class="form-control" />
                                 <span class="input-group-btn">
                                     <button class="btn btn-primary" type="button" id="generate_secret_key"><?php echo $button_generate_secret_key; ?></button>
                                 </span>
                             </div>
                             <?php if ($error_secret_key) { ?>
                             <div class="text-danger"><?php echo $error_secret_key; ?></div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-entry-statuses"><?php echo $entry_endpoint_statuses; ?><div style="font-weight: normal;"><?php echo $info_endpoint_statuses; ?></div></label>
+                        <div class="col-sm-10">
+                            <?php foreach($vsbridge_endpoint_statuses as $eskey => $esvalue) { ?>
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    <?php echo $eskey; ?>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="vsbridge_endpoint_statuses[<?php echo $eskey; ?>]" class="form-control">
+                                        <?php if ($esvalue) { ?>
+                                        <option value="1" selected="selected"><?php echo $text_enabled; ?></option>
+                                        <option value="0"><?php echo $text_disabled; ?></option>
+                                        <?php } else { ?>
+                                        <option value="1"><?php echo $text_enabled; ?></option>
+                                        <option value="0" selected="selected"><?php echo $text_disabled; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                            </div>
                             <?php } ?>
                         </div>
                     </div>

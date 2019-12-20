@@ -25,8 +25,10 @@ class ControllerExtensionModuleVsbridge extends Controller {
 
         $data['entry_status'] = $this->language->get('entry_status');
         $data['entry_secret_key'] = $this->language->get('entry_secret_key');
+        $data['entry_endpoint_statuses'] = $this->language->get('entry_endpoint_statuses');
 
         $data['info_secret_key'] = $this->language->get('info_secret_key');
+        $data['info_endpoint_statuses'] = $this->language->get('info_endpoint_statuses');
 
         $data['button_save'] = $this->language->get('button_save');
         $data['button_cancel'] = $this->language->get('button_cancel');
@@ -65,16 +67,30 @@ class ControllerExtensionModuleVsbridge extends Controller {
 
         $data['cancel'] = $this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=module', true);
 
-        if (isset($this->request->post['vsbridge_status'])) {
-            $data['vsbridge_status'] = $this->request->post['vsbridge_status'];
-        } else {
-            $data['vsbridge_status'] = $this->config->get('vsbridge_status');
-        }
+        $default_endpoint_statuses = array(
+            'attributes' => true,
+            'auth' => true,
+            'cart' => true,
+            'categories' => true,
+            'order' => true,
+            'product' => true,
+            'products' => true,
+            'stock' => true,
+            'sync_session' => true,
+            'taxrules' => true,
+            'user' => true
+        );
 
-        if (isset($this->request->post['vsbridge_secret_key'])) {
-            $data['vsbridge_secret_key'] = $this->request->post['vsbridge_secret_key'];
+        $data['vsbridge_status'] = $this->request->post['vsbridge_status'] ?? $this->config->get('vsbridge_status');
+
+        $data['vsbridge_secret_key'] = $this->request->post['vsbridge_secret_key'] ?? $this->config->get('vsbridge_secret_key');
+
+        if (isset($this->request->post['vsbridge_endpoint_statuses'])) {
+            $data['vsbridge_endpoint_statuses'] = $this->request->post['vsbridge_endpoint_statuses'];
+        } elseif(!empty($this->config->get('vsbridge_endpoint_statuses'))) {
+            $data['vsbridge_endpoint_statuses'] = $this->config->get('vsbridge_endpoint_statuses');
         } else {
-            $data['vsbridge_secret_key'] = $this->config->get('vsbridge_secret_key');
+            $data['vsbridge_endpoint_statuses'] = $default_endpoint_statuses;
         }
 
         $data['header'] = $this->load->controller('common/header');
