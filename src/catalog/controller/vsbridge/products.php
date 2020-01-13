@@ -109,6 +109,47 @@ class ControllerVsbridgeProducts extends VsbridgeController{
         $this->sendResponse();
     }
 
+    public function slugify($text) {
+        // replace non letter or digits by -
+        $text = preg_replace('#[^\\pL\d]+#u', '-', $text);
+
+        // trim
+        $text = trim($text, '-');
+
+        // transliterate
+        if (function_exists('transliterator_transliterate'))
+        {
+            $text = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $text);
+        }
+
+        // lowercase
+        $text = strtolower($text);
+
+        // remove unwanted characters
+        $text = preg_replace('#[^-\w]+#', '', $text);
+
+        if (empty($text))
+        {
+            return 'n-a';
+        }
+
+        return $text;
+    }
+
+    public function createSlug($product_id, $product_name) {
+        $slug = str_replace('/','', parse_url($this->url->link('product/product', 'product_id=' . $product_id))['path']);
+
+        // If there are no SEO slugs available for the product, the resulting $slug will be index.php, which is invalid.
+        // Detect if an invalid slug is present and generate a slug manually based on the product name.
+        $invalid_slugs = array('index.php');
+
+        if(in_array($slug, $invalid_slugs) || empty($slug)) {
+            $slug = $this->slugify($product_name);
+        }
+
+        return $slug;
+    }
+
     public function populateProducts($input){
         if(isset($input['products']) && isset($input['language_id'])){
             $products = $input['products'];
@@ -174,7 +215,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         }
                     }
 
-                    $slug = str_replace('/','',parse_url($this->url->link('product/product', 'product_id=' . $product['product_id']))['path']);
+                    $slug = $this->createSlug($product['product_id'], $product['name']);
 
                     $original_price_incl_tax = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->config->get('config_currency'), NULL, FALSE);
                     $original_price_excl_tax = $this->currency->format($product['price'], $this->config->get('config_currency'), NULL, FALSE);
@@ -226,7 +267,8 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'media_gallery' => $media_gallery,
                         'name' => $product['name'],
                         'status' => (int) $product['status'],
-                        'slug' => $slug
+                        'slug' => $slug,
+                        'url_path' => $slug
                     );
 
                     if(!empty($product['quantity'])){
@@ -254,6 +296,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                     $oc_url_alias = $this->model_vsbridge_api->getUrlAlias('product', $product['product_id']);
 
                     if(!empty($oc_url_alias['keyword'])){
+                        $product_array['slug'] = $oc_url_alias['keyword'];
                         $product_array['url_path'] = $oc_url_alias['keyword'];
                     }
 
@@ -261,6 +304,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                     $seo_url_alias = $this->model_vsbridge_api->getSeoUrlAlias('product', $product['product_id'], $this->language_id);
 
                     if(!empty($seo_url_alias['keyword'])){
+                        $product_array['slug'] = $seo_url_alias['keyword'];
                         $product_array['url_path'] = $seo_url_alias['keyword'];
                     }
 
