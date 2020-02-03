@@ -7,19 +7,25 @@ class ModelVsbridgeApi extends Model {
     }
 
     public function getAttributes($language_id) {
-        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "attribute_description` WHERE `language_id` = '".(int) $language_id."'");
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "attribute_description` ad INNER JOIN `" . DB_PREFIX . "attribute` a ON (a.attribute_id = ad.attribute_id) WHERE `language_id` = '".(int) $language_id."'");
+
+        return $query->rows;
+    }
+
+    public function getAttributeGroups($language_id) {
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "attribute_group_description` agd INNER JOIN `" . DB_PREFIX . "attribute_group` ag ON (ag.attribute_group_id = agd.attribute_group_id) WHERE `language_id` = '".(int) $language_id."'");
 
         return $query->rows;
     }
 
     public function getFilters($filter_group_id, $language_id){
-        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "filter_description` WHERE `filter_group_id` = '".(int) $filter_group_id."' AND `language_id` = '".(int) $language_id."'");
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "filter_description` fd INNER JOIN `" . DB_PREFIX ."filter` f ON (f.filter_id = fd.filter_id) WHERE fd.`filter_group_id` = '".(int) $filter_group_id."' AND `language_id` = '".(int) $language_id."'");
 
         return $query->rows;
     }
 
     public function getFilterGroups($language_id){
-        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "filter_group_description` WHERE `language_id` = '".(int) $language_id."'");
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "filter_group_description` fgd INNER JOIN `" . DB_PREFIX ."filter_group` fg ON (fg.filter_group_id = fgd.filter_group_id) WHERE `language_id` = '".(int) $language_id."'");
 
         return $query->rows;
     }
@@ -387,6 +393,21 @@ class ModelVsbridgeApi extends Model {
         }
 
         $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cart` WHERE session_id ='". $this->db->escape($cart_id) ."' ".$customer_lookup);
+
+        return $query->rows;
+    }
+
+    public function getWeightClass($weight_class_id, $language_id) {
+        $sql = "SELECT * FROM " . DB_PREFIX . "weight_class wc LEFT JOIN " . DB_PREFIX . "weight_class_description wcd ON (wc.weight_class_id = wcd.weight_class_id AND wcd.language_id = '". (int) $language_id ."') WHERE wc.weight_class_id = '". (int) $weight_class_id ."' ORDER BY title";
+        $query = $this->db->query($sql);
+
+        return $query->rows;
+    }
+
+    public function getLengthClass($length_class_id, $language_id) {
+        $sql = "SELECT * FROM " . DB_PREFIX . "length_class lc LEFT JOIN " . DB_PREFIX . "length_class_description lcd ON (lc.length_class_id = lcd.length_class_id AND lcd.language_id = '". (int) $language_id ."') WHERe lc.length_class_id = '". (int) $length_class_id ."' ORDER BY title";
+
+        $query = $this->db->query($sql);
 
         return $query->rows;
     }

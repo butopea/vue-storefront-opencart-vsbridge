@@ -6,7 +6,7 @@ class ControllerVsbridgeAttributes extends VsbridgeController{
 
     /*
      * GET /vsbridge/attributes/index
-     * This method is used to get all the attributes from OpenCart.
+     * This method is used to get all of the attributes from OpenCart.
      *
      * Following https://github.com/DivanteLtd/vue-storefront-integration-boilerplate/blob/master/1.%20Expose%20the%20API%20endpoints%20required%20by%20VS/Product%20Attributes.md
      *
@@ -27,6 +27,12 @@ class ControllerVsbridgeAttributes extends VsbridgeController{
         $attributes = $this->model_vsbridge_api->getAttributes($language_id);
 
         foreach($attributes as $attribute){
+            // To avoid the conflict of attribute IDs and filter IDs, an offset of 10000 is added to attribute IDs and attribute group IDs
+            $attribute['attribute_id'] = ((int) $attribute['attribute_id']) + 10000;
+            $attribute['attribute_group_id'] = ((int) $attribute['attribute_group_id']) + 10000;
+
+
+            // We've also added an attribute_group_id field to accompany the /groups endpoint below
             array_push($response, array(
                 'attribute_code' => 'attribute_'.$attribute['attribute_id'],
                 'frontend_input' => 'text',
@@ -34,13 +40,14 @@ class ControllerVsbridgeAttributes extends VsbridgeController{
                 'default_frontend_label' => $attribute['name'],
                 'is_user_defined' => true,
                 'is_unique' => false,
-                'attribute_id' => (int) $attribute['attribute_id'],
+                'attribute_id' => $attribute['attribute_id'],
                 'is_visible' => true,
                 'is_comparable' => true,
                 'is_visible_on_front' => true,
                 'position' => 0,
-                'id' => (int) $attribute['attribute_id'],
-                'options' => array()
+                'id' => $attribute['attribute_id'],
+                'options' => array(),
+                'attribute_group_id' => (int) $attribute['attribute_group_id']
             ));
         }
 
@@ -70,7 +77,7 @@ class ControllerVsbridgeAttributes extends VsbridgeController{
                 'is_visible' => true,
                 'is_comparable' => true,
                 'is_visible_on_front' => true,
-                'position' => 0,
+                'position' => (int) $filter_group['sort_order'],
                 'id' => (int) $filter_group['filter_group_id'],
                 'options' => $options
             ));
@@ -81,4 +88,43 @@ class ControllerVsbridgeAttributes extends VsbridgeController{
         $this->sendResponse();
     }
 
+    /*
+     * [Note: This endpoint is custom-made and is not required by Vue Storefront.]
+     *
+     * GET /vsbridge/attributes/groups
+     * This method is used to get all of the attribute groups in OpenCart.
+     *
+     * GET PARAMS:
+     * apikey - authorization key provided by /vsbridge/auth/admin endpoint
+     */
+    public function groups() {
+        $this->validateToken($this->getParam('apikey'));
+
+        $language_id = $this->language_id;
+
+        $this->load->model('vsbridge/api');
+
+        $response = array();
+
+        // Retrieve the attribute groups
+        $attribute_groups = $this->model_vsbridge_api->getAttributeGroups($language_id);
+
+        foreach($attribute_groups as $attribute_group){
+
+            // To avoid the conflict of attribute group IDs and filter group IDs, an offset of 10000 is added
+            $attribute_group['attribute_group_id'] = ((int) $attribute_group['attribute_group_id']) + 10000;
+
+            array_push($response, array(
+                'frontend_label' => $attribute_group['name'],
+                'is_visible' => true,
+                'position' => (int) $attribute_group['sort_order'],
+                'id' => $attribute_group['attribute_group_id'],
+                'attribute_group_id' => $attribute_group['attribute_group_id']
+            ));
+        }
+
+        $this->result = $response;
+
+        $this->sendResponse();
+    }
 }

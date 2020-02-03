@@ -281,8 +281,20 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         $product_array['qty'] = 0;
                     }
 
+                    foreach(array('length', 'width', 'height', 'weight') as $dimension) {
+                        $product_array[$dimension] =  (float) number_format($product[$dimension],2);
+                    }
+
+                    $weight_class =  $this->model_vsbridge_api->getWeightClass($product['weight_class_id'], $this->language_id);
+                    $length_class = $this->model_vsbridge_api->getLengthClass($product[$dimension.'_class_id'], $this->language_id);
+
+                    $product_array['weight_class'] = isset($weight_class[0]['unit']) ? trim($weight_class[0]['unit']) : '';
+                    $product_array['length_class'] = isset($length_class[0]['unit']) ? trim($length_class[0]['unit']) : '';
+
                     foreach($product_attributes as $product_attribute){
                         if(isset($product_attribute['attribute_id'])){
+                            // To avoid the conflict of attribute IDs and filter IDs, an offset of 10000 is added
+                            $product_attribute['attribute_id'] = ((int) $product_attribute['attribute_id']) + 10000;
                             $product_array['attribute_'.$product_attribute['attribute_id']] = trim($product_attribute['text']);
                         }
                     }
