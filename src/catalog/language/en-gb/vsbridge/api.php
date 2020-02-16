@@ -30,3 +30,5 @@ $_['error_cart_product_stock'] = 'Cart does not have products with valid stocks.
 $_['error_minimum_product_quantity'] = 'You must order at least %s of %s, but the current ordered quantity is %s.';
 $_['error_extension_disabled'] = 'Extension disabled.';
 $_['error_api_endpoint_disabled'] = 'API endpoint disabled.';
+$_['error_token_expired'] = 'Authentication failed. Token has expired.';
+$_['error_invalid_token'] = 'Authentication failed. Invalid token.';

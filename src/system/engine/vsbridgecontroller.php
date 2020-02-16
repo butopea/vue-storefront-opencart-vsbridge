@@ -327,6 +327,7 @@ abstract class VsbridgeController extends Controller {
     /* Validate customer token */
     protected function validateCustomerToken($token){
         $this->load->model('vsbridge/api');
+        $this->load->language('vsbridge/api');
         $token_info = $this->model_vsbridge_api->getCustomerToken($token);
 
         if(!empty($token_info['timestamp']) && !empty($token_info['customer_id'])){
@@ -344,14 +345,20 @@ abstract class VsbridgeController extends Controller {
                 return $customer_info;
 
             }else{
-                $this->code = 500;
-                $this->result = "Authentication failed. Token has expired.";
+                $this->code = 401;
+                $this->result = array(
+                    "code" => $this->code,
+                    "error" => $this->language->get('error_token_expired')
+                );
                 $this->sendResponse();
             }
 
         }else{
-            $this->code = 500;
-            $this->result = "Authentication failed. Invalid token.";
+            $this->code = 401;
+            $this->result = array(
+                "code" => $this->code,
+                "error" => $this->language->get('error_invalid_token')
+            );
             $this->sendResponse();
         }
     }
