@@ -268,7 +268,9 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'name' => $product['name'],
                         'status' => (int) $product['status'],
                         'slug' => $slug,
-                        'url_path' => $slug
+                        'url_path' => $slug,
+                        'created_at' => $product['date_added'],
+                        'updated_at' => $product['date_modified']
                     );
 
                     if(!empty($product['quantity'])){
