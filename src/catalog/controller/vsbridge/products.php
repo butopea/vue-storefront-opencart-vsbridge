@@ -274,13 +274,13 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'updated_at' => $product['date_modified']
                     );
 
-                    if (!empty($product['quantity'])) {
-                        if (intval($product['quantity']) > 10) {
-                            $product_array['qty'] = 10;
-                        } else {
-                            $product_array['qty'] = (int) $product['quantity'];
+                    if(!empty($product['quantity'])){
+                        if(intval($product['quantity']) > 0){
+                            $product_array['qty'] = 1;
+                        }else{
+                            $product_array['qty'] = 0;
                         }
-                    } else {
+                    }else{
                         $product_array['qty'] = 0;
                     }
 
