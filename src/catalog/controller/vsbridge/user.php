@@ -608,6 +608,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
                         'item_id' => (int) $order_product['product_id'],
                         'name' => $order_product['name'],
                         'sku' => $product_info['sku'],
+                        'model' => $product_info['model'],
                         'price_incl_tax' => floatval($order_product['price']) + floatval($order_product['tax']),
                         'qty_ordered' => (int) $order_product['quantity'],
                         'row_total_incl_tax' => floatval($order_product['total']) + floatval($order_product['tax']),

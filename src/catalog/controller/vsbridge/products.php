@@ -244,6 +244,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'id' => (int) $product['product_id'],
                         'type_id' => 'simple',
                         'sku' => $product['sku'],
+                        'model' => $product['model'],
                         'category' => $adjusted_categories,
                         'category_ids' => $category_ids,
                         'description' => $product['description'],

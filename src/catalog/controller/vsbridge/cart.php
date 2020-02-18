@@ -113,6 +113,7 @@ class ControllerVsbridgeCart extends VsbridgeController{
                         $response[] = array(
                             'item_id' => (int)$cart_product['cart_id'],
                             'sku' => $product_info['sku'],
+                            'model' => $product_info['model'],
                             'qty' => (int)$cart_product['quantity'],
                             'name' => $product_info['name'],
                             'price' => (float)$product_info['price'],
