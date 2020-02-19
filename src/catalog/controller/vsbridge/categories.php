@@ -130,14 +130,14 @@ class ControllerVsbridgeCategories extends VsbridgeController{
             $element['slug'] = $name_slug.'-'.$element['id'];
 
             // Change if you use a custom SEO extension
-            $element['url_key'] = $element['slug'];
-            $element['url_path'] = implode('/', array_merge($name_path, array($name_slug))).'-'.$element['id'];
+            $element['url_key'] = trim($element['slug']);
+            $element['url_path'] = trim(implode('/', array_merge($name_path, array($name_slug))).'-'.$element['id']);
 
             // Check for SEO URls via the OpenCart extension [SEO BackPack 2.9.1]
             $seo_url_alias = $this->model_vsbridge_api->getSeoUrlAlias('category', $element['id'], $this->language_id);
 
             if(!empty($seo_url_alias['keyword'])){
-              $element['url_path'] = $seo_url_alias['keyword'];
+              $element['url_path'] = trim($seo_url_alias['keyword']);
             }
 
             $element['level'] = $current_level + 1;

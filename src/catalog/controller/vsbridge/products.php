@@ -311,16 +311,16 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                     $oc_url_alias = $this->model_vsbridge_api->getUrlAlias('product', $product['product_id']);
 
                     if(!empty($oc_url_alias['keyword'])){
-                        $product_array['slug'] = $oc_url_alias['keyword'];
-                        $product_array['url_path'] = $oc_url_alias['keyword'];
+                        $product_array['slug'] = trim($oc_url_alias['keyword']);
+                        $product_array['url_path'] = trim($oc_url_alias['keyword']);
                     }
 
                     // Check for SEO URls via the OpenCart extension [SEO BackPack 2.9.1]
                     $seo_url_alias = $this->model_vsbridge_api->getSeoUrlAlias('product', $product['product_id'], $this->language_id);
 
                     if(!empty($seo_url_alias['keyword'])){
-                        $product_array['slug'] = $seo_url_alias['keyword'];
-                        $product_array['url_path'] = $seo_url_alias['keyword'];
+                        $product_array['slug'] = trim($seo_url_alias['keyword']);
+                        $product_array['url_path'] = trim($seo_url_alias['keyword']);
                     }
 
                     // Related products
