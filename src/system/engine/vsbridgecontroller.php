@@ -59,7 +59,8 @@ abstract class VsbridgeController extends Controller {
     /* Prevent access to API endpoint if disabled in extension settings */
     public function checkEndpointStatus()
     {
-        $endpoint_name = str_replace('controllervsbridge', '', strtolower(get_class($this)));
+        $class_name = strtolower(preg_replace('/\B([A-Z])/', '_$1', get_class($this)));
+        $endpoint_name = str_replace('controller_vsbridge_', '', $class_name);
 
         if(empty($this->config->get('vsbridge_endpoint_statuses')[$endpoint_name])) {
             $this->load->language('vsbridge/api');
