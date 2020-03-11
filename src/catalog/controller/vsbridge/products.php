@@ -267,6 +267,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'tax_class_id' => (int) $product['tax_class_id'],
                         'media_gallery' => $media_gallery,
                         'name' => $product['name'],
+                        'minimum' => !empty($product['minimum']) ? (int) $product['minimum'] : 1,
                         'status' => (int) $product['status'],
                         'slug' => $slug,
                         'url_path' => $slug,
@@ -274,14 +275,11 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'updated_at' => $product['date_modified']
                     );
 
-                    if(!empty($product['quantity'])){
-                        if(intval($product['quantity']) > 0){
-                            $product_array['qty'] = 1;
-                        }else{
-                            $product_array['qty'] = 0;
-                        }
-                    }else{
-                        $product_array['qty'] = 0;
+                    $product_array['qty'] = 0;
+
+                    if(isset($product['quantity']) && intval($product['quantity']) > 0) {
+                        // If the product has stock, set the add-to-cart qty as the minimum product quantity
+                        $product_array['qty'] = $product_array['minimum'];
                     }
 
                     foreach(array('length', 'width', 'height', 'weight') as $dimension) {

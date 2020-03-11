@@ -93,9 +93,9 @@ class ControllerVsbridgeCart extends VsbridgeController{
         $token = $this->getParam('token', true);
         $cart_id = $this->getParam('cartId');
 
-        if($this->validateCartId($cart_id, $token)){
-            $this->load->model('vsbridge/api');
+        $this->load->model('vsbridge/api');
 
+        if($this->validateCartId($cart_id, $token)){
             $cart = $this->cart->getProducts();
 
             $response = array();
@@ -124,14 +124,14 @@ class ControllerVsbridgeCart extends VsbridgeController{
                 }
             }
 
-            if(!empty($out_of_stock_products)){
+            if(!empty($out_of_stock_products)) {
                 $this->load->language('vsbridge/api');
                 $this->code = 500;
-                $this->result = $this->language->get('error_out_of_stock').' '.implode(', ', $out_of_stock_products);
-            }else{
-                $this->result = $response;
+                $this->result = $this->language->get('error_out_of_stock') . ' ' . implode(', ', $out_of_stock_products);
+                $this->sendResponse();
             }
 
+            $this->result = $response;
         }
 
         $this->sendResponse();
@@ -188,77 +188,91 @@ class ControllerVsbridgeCart extends VsbridgeController{
         $cart_id = $this->getParam('cartId');
         $input = $this->getPost();
 
+        $this->load->model('vsbridge/api');
+
         if($this->validateCartId($cart_id, $token)){
-            if(!empty($input['cartItem'])){
-
-                if(!empty($input['cartItem']['sku']) && isset($input['cartItem']['qty'])){
-
-                    $input['cartItem']['qty'] = (int) $input['cartItem']['qty'];
-
-                    /* quantity must be greater than or equal to 1 */
-                    /* the delete endpoint is used for removing the item from the cart */
-                    if($input['cartItem']['qty'] < 1){
-                        $input['cartItem']['qty'] = 1;
-                    }
-
-                    $this->load->model('vsbridge/api');
-
-                    $product_info = $this->model_vsbridge_api->getProductBySku($input['cartItem']['sku'], $this->language_id);
-
-                    if(!empty($product_info)){
-
-                        // Check if the requested quantity is available on the selected product
-                        if(intval($input['cartItem']['qty']) <= intval($product_info['quantity'])){
-
-                            if(isset($input['cartItem']['item_id'])){
-                                $this->cart->update($input['cartItem']['item_id'], $input['cartItem']['qty']);
-                            }else{
-                                $this->cart->add($product_info['product_id'], $input['cartItem']['qty']);
-                            }
-
-                            $cart_products = $this->cart->getProducts();
-
-                            $response = array();
-
-                            foreach($cart_products as $cart_product){
-                                if($cart_product['product_id'] == $product_info['product_id']){
-                                    $response = array(
-                                        'item_id' => (int) $cart_product['cart_id'],
-                                        'sku' => $cart_product['model'],
-                                        'qty' => (int) $cart_product['quantity'],
-                                        'name' => $cart_product['name'],
-                                        'price' => (float) $cart_product['price'],
-                                        'product_type' => 'simple',
-                                        'quote_id' => $cart_id
-                                    );
-                                }
-                            }
-
-                            $this->result = $response;
-
-                        }else{
-                            $this->load->language('vsbridge/api');
-                            $this->code = 500;
-                            $this->result = $this->language->get('error_out_of_stock').' ['.$product_info['model'].'] '.$product_info['name'];
-                        }
-
-                    }else{
-                        $this->load->language('vsbridge/api');
-                        $this->code = 500;
-                        $this->result = $this->language->get('error_invalid_sku');
-                    }
-
-                }else{
-                    $this->load->language('vsbridge/api');
-                    $this->code = 500;
-                    $this->result = $this->language->get('error_missing_sku_qty');
-                }
-
-            }else{
+            if(empty($input['cartItem'])) {
                 $this->load->language('vsbridge/api');
                 $this->code = 500;
                 $this->result = $this->language->get('error_missing_cart_item');
+                $this->sendResponse();
             }
+
+            if(empty($input['cartItem']['sku'])){
+                $this->load->language('vsbridge/api');
+                $this->code = 500;
+                $this->result = $this->language->get('error_missing_sku_qty');
+                $this->sendResponse();
+            }
+
+            $input['cartItem']['qty'] = (int) $input['cartItem']['qty'];
+
+            /* quantity must be greater than or equal to 1 */
+            /* the delete endpoint is used for removing the item from the cart */
+            if($input['cartItem']['qty'] < 1){
+                $input['cartItem']['qty'] = 1;
+            }
+
+            $product_info = $this->model_vsbridge_api->getProductBySku($input['cartItem']['sku'], $this->language_id);
+
+            if(empty($product_info)){
+                $this->load->language('vsbridge/api');
+                $this->code = 500;
+                $this->result = $this->language->get('error_invalid_sku');
+                $this->sendResponse();
+            }
+
+            // Check if the requested quantity is available on the selected product
+            if(intval($input['cartItem']['qty']) > intval($product_info['quantity'])){
+                $this->load->language('vsbridge/api');
+                $this->code = 500;
+                $this->result = $this->language->get('error_out_of_stock').' ['.$product_info['model'].'] '.$product_info['name'];
+                $this->sendResponse();
+            }
+
+            // Check if the requested quantity meets the minimum (and multiple of minimum) product quantity
+            if($product_info['minimum']){
+                if (intval($input['cartItem']['qty']) < intval($product_info['minimum'])) {
+                    $this->load->language('vsbridge/api');
+                    $this->code = 500;
+                    $this->result = sprintf($this->language->get('error_minimum_product_quantity'), $product_info['model'], $product_info['minimum']);
+                    $this->sendResponse();
+                }
+
+                $qty_multiple = intval($input['cartItem']['qty']) / intval($product_info['minimum']);
+                if (!is_int($qty_multiple)) {
+                    $this->load->language('vsbridge/api');
+                    $this->code = 500;
+                    $this->result = sprintf($this->language->get('error_minimum_multiple_product_quantity'), $product_info['model'], $product_info['minimum']);
+                    $this->sendResponse();
+                }
+            }
+
+            if(isset($input['cartItem']['item_id'])){
+                $this->cart->update($input['cartItem']['item_id'], $input['cartItem']['qty']);
+            }else{
+                $this->cart->add($product_info['product_id'], $input['cartItem']['qty']);
+            }
+
+            $cart_products = $this->cart->getProducts();
+
+            $response = array();
+
+            foreach($cart_products as $cart_product){
+                if($cart_product['product_id'] == $product_info['product_id']){
+                    $response = array(
+                        'item_id' => (int) $cart_product['cart_id'],
+                        'sku' => $cart_product['model'],
+                        'qty' => (int) $cart_product['quantity'],
+                        'name' => $cart_product['name'],
+                        'price' => (float) $cart_product['price'],
+                        'product_type' => 'simple',
+                        'quote_id' => $cart_id
+                    );
+                }
+            }
+
+            $this->result = $response;
         }
 
         $this->sendResponse();
@@ -294,38 +308,37 @@ class ControllerVsbridgeCart extends VsbridgeController{
         $cart_id = $this->getParam('cartId');
         $input = $this->getPost();
 
+        $this->load->model('vsbridge/api');
+
         if($this->validateCartId($cart_id, $token)) {
-            if (!empty($input['cartItem'])) {
-
-                if (!empty($input['cartItem']['sku']) && isset($input['cartItem']['item_id'])) {
-
-                    $this->load->model('vsbridge/api');
-
-                    $product_info = $this->model_vsbridge_api->getProductBySku($input['cartItem']['sku'], $this->language_id);
-
-                    if(!empty($product_info)){
-
-                        $this->cart->remove($input['cartItem']['item_id']);
-
-                        $this->result = true;
-
-                    }else{
-                        $this->load->language('vsbridge/api');
-                        $this->code = 500;
-                        $this->result = $this->language->get('error_invalid_sku');
-                    }
-
-                }else{
-                    $this->load->language('vsbridge/api');
-                    $this->code = 500;
-                    $this->result = $this->language->get('error_missing_sku_item_id');
-                }
-
-            }else{
+            if (empty($input['cartItem'])) {
                 $this->load->language('vsbridge/api');
                 $this->code = 500;
                 $this->result = $this->language->get('error_missing_cart_item');
+                $this->sendResponse();
             }
+
+            if (empty($input['cartItem']['sku']) || !isset($input['cartItem']['item_id'])) {
+                $this->load->language('vsbridge/api');
+                $this->code = 500;
+                $this->result = $this->language->get('error_missing_sku_item_id');
+                $this->sendResponse();
+            }
+
+
+
+            $product_info = $this->model_vsbridge_api->getProductBySku($input['cartItem']['sku'], $this->language_id);
+
+            if(empty($product_info)){
+                $this->load->language('vsbridge/api');
+                $this->code = 500;
+                $this->result = $this->language->get('error_invalid_sku');
+                $this->sendResponse();
+            }
+
+            $this->cart->remove($input['cartItem']['item_id']);
+
+            $this->result = true;
         }
 
         $this->sendResponse();
@@ -347,21 +360,20 @@ class ControllerVsbridgeCart extends VsbridgeController{
         $cart_id = $this->getParam('cartId');
         $coupon = $this->getParam('coupon');
 
-        if($this->validateCartId($cart_id, $token)) {
+        $this->load->model('extension/total/coupon');
 
-            $this->load->model('extension/total/coupon');
+        if($this->validateCartId($cart_id, $token)) {
             $coupon_info = $this->model_extension_total_coupon->getCoupon($coupon);
 
-            if($coupon_info){
-                $this->session->data['coupon'] = $coupon;
-                $this->result = true;
-
-            }else{
+            if(!$coupon_info){
                 $this->load->language('extension/total/coupon');
                 $this->code = 500;
                 $this->result = $this->language->get('error_coupon');
+                $this->sendResponse();
             }
 
+            $this->session->data['coupon'] = $coupon;
+            $this->result = true;
         }
 
         $this->sendResponse();
@@ -554,7 +566,6 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
         if($this->validateCartId($cart_id, $token)) {
             /* We're estimating the payment methods since OpenCart requires address details that aren't provided by VSF at registration */
-
             $this->load->language('checkout/checkout');
 
             $country_id = $this->config->get('config_country_id');
@@ -655,20 +666,22 @@ class ControllerVsbridgeCart extends VsbridgeController{
             }
 
             if (empty($this->session->data['payment_methods'])) {
+                $this->load->language('vsbridge/api');
                 $this->code = 500;
                 $this->result = $this->language->get('error_no_payment');
-            }else{
-                $adjusted_payment_methods = array();
-
-                foreach($this->session->data['payment_methods'] as $payment_method){
-                    $adjusted_payment_methods[] = array(
-                        'code' => $payment_method['code'],
-                        'title' => $payment_method['title']
-                    );
-                }
-
-                $this->result = $adjusted_payment_methods;
+                $this->sendResponse();
             }
+
+            $adjusted_payment_methods = array();
+
+            foreach($this->session->data['payment_methods'] as $payment_method){
+                $adjusted_payment_methods[] = array(
+                    'code' => $payment_method['code'],
+                    'title' => $payment_method['title']
+                );
+            }
+
+            $this->result = $adjusted_payment_methods;
         }
 
         $this->sendResponse();
@@ -750,6 +763,25 @@ class ControllerVsbridgeCart extends VsbridgeController{
                     $quote = $this->{'model_extension_shipping_' . $result['code']}->getQuote($this->session->data['shipping_address']);
 
                     if ($quote) {
+// Clear Thinking: Ultimate Restrictions
+                        if (($this->config->get('ultimate_restrictions_status') || $this->config->get('module_ultimate_restrictions_status')) && isset($this->session->data['ultimate_restrictions'])) {
+                            foreach ($quote['quote'] as $index => $restricting_quote) {
+                                foreach ($this->session->data['ultimate_restrictions'] as $extension => $rules) {
+                                    if ($extension != $result['code']) continue;
+                                    foreach ($rules as $comparison => $values) {
+                                        $adjusted_title = explode('(', $restricting_quote['title']);
+                                        $adjusted_title = strtolower(html_entity_decode(trim($adjusted_title[0]), ENT_QUOTES, 'UTF-8'));
+                                        if (($comparison == 'is' && in_array($adjusted_title, $values)) || ($comparison == 'not' && !in_array($adjusted_title, $values))) {
+                                            unset($quote['quote'][$index]);
+                                        }
+                                    }
+                                }
+                            }
+                            if (empty($quote['quote'])) {
+                                continue;
+                            }
+                        }
+                        // end
                         $shipping_methods[$result['code']] = array(
                             'title'      => $quote['title'],
                             'quote'      => $quote['quote'],
@@ -768,13 +800,13 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
             array_multisort($sort_order, SORT_ASC, $shipping_methods);
 
-            if ($shipping_methods) {
-                $this->session->data['shipping_methods'] = $shipping_methods;
-            } else {
+            if (!$shipping_methods) {
                 $this->code = 500;
                 $this->result = $this->language->get('error_no_shipping');
+                $this->sendResponse();
             }
 
+            $this->session->data['shipping_methods'] = $shipping_methods;
 
             $adjusted_shipping_methods = array();
 
