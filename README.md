@@ -70,7 +70,7 @@ Made with ❤ by [Butopêa](https://butopea.com)
 **Support:**
 
 
-Please ask your questions regarding this extension on Vue Storefront's Slack https://vuestorefront.slack.com/ You can join via [this invitation link]().
+Please ask your questions regarding this extension on Vue Storefront's Slack https://vuestorefront.slack.com/ You can join via [this invitation link](https://slack.vuestorefront.io/).
 
 **License:**
 
