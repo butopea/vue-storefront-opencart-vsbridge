@@ -215,6 +215,13 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         }
                     }
 
+                    $tags = array();
+                    if(!empty($product['tag'])) {
+                        foreach(explode(',', $product['tag']) as $tag) {
+                            array_push($tags, trim($tag));
+                        }
+                    }
+
                     $slug = $this->createSlug($product['product_id'], $product['name']);
 
                     $original_price_incl_tax = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->config->get('config_currency'), NULL, FALSE);
@@ -270,6 +277,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'minimum' => !empty($product['minimum']) ? (int) $product['minimum'] : 1,
                         'status' => (int) $product['status'],
                         'slug' => $slug,
+                        'tags' => $tags,
                         'url_path' => $slug,
                         'created_at' => $product['date_added'],
                         'updated_at' => $product['date_modified']
