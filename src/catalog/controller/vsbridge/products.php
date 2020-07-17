@@ -274,6 +274,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'tax_class_id' => (int) $product['tax_class_id'],
                         'media_gallery' => $media_gallery,
                         'name' => $product['name'],
+                        'manufacturer' => $product['manufacturer'],
                         'minimum' => !empty($product['minimum']) ? (int) $product['minimum'] : 1,
                         'status' => (int) $product['status'],
                         'slug' => $slug,
