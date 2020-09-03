@@ -247,6 +247,8 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         }
                     }
 
+                    $product_layout = $this->slugify($this->model_vsbridge_api->getProductLayoutName($product['product_id'], $this->store_id));
+
                     $product_array = array(
                         'id' => (int) $product['product_id'],
                         'type_id' => 'simple',
@@ -281,7 +283,8 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'tags' => $tags,
                         'url_path' => $slug,
                         'created_at' => $product['date_added'],
-                        'updated_at' => $product['date_modified']
+                        'updated_at' => $product['date_modified'],
+                        'product_layout' => $product_layout,
                     );
 
                     $product_array['qty'] = 0;

@@ -121,6 +121,18 @@ class ModelVsbridgeApi extends Model {
         return $query->rows;
     }
 
+    public function getProductLayoutName($product_id, $store_id = 0){
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_layout` LEFT JOIN `" . DB_PREFIX . "layout` ON `" . DB_PREFIX . "product_to_layout`.`layout_id` = `" . DB_PREFIX . "layout`.`layout_id` WHERE `" . DB_PREFIX . "product_to_layout`.`product_id` = '" . (int)$product_id . "' AND `" . DB_PREFIX . "product_to_layout`.`store_id` = '" . (int)$store_id. "'");
+
+        $product_layout_name = 'default';
+
+        if ($query->num_rows && $query->row['name']) {
+            $product_layout_name = $query->row['name'];
+        }
+
+        return $product_layout_name;
+    }
+
     // For use with the Advanced Product Variant extension
     public function getProductVariants($product_id, $language_id){
         $check_table = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "variantproducts'");
