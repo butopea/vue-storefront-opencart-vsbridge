@@ -256,7 +256,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'model' => $product['model'],
                         'category' => $adjusted_categories,
                         'category_ids' => $category_ids,
-                        'description' => $product['description'],
+                        'description' => strip_tags(html_entity_decode($product['description'])),
                         'custom_attributes' => $custom_attributes,
                         'price' =>  $original_price_incl_tax,
                         'final_price' => isset($special_price_incl_tax) ? $special_price_incl_tax : $original_price_incl_tax,
