@@ -282,8 +282,8 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'slug' => $slug,
                         'tags' => $tags,
                         'url_path' => $slug,
-                        'created_at' => $product['date_added'],
-                        'updated_at' => $product['date_modified'],
+                        'created_at' => $this->sanitizeDateTime($product['date_added']),
+                        'updated_at' => $this->sanitizeDateTime($product['date_modified']),
                         'product_layout' => $product_layout,
                     );
 

@@ -168,6 +168,14 @@ abstract class VsbridgeController extends Controller {
         return false;
     }
 
+    /* Converts the default zero-filled date to null to avoid an ElasticSearch error */
+    public function sanitizeDateTime($date_time) {
+        if ($date_time == '0000-00-00 00:00:00') {
+            return null;
+        }
+        return $date_time;
+    }
+
     /* Check if the input index exists and whether or not it's empty */
     public function checkInput($input, $index, $required = false, $empty_allowed = true, $value_if_empty = null){
         if(isset($input[$index])){
