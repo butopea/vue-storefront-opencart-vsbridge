@@ -314,10 +314,13 @@ abstract class VsbridgeController extends Controller {
     }
 
     /* Retrieve or generate customer/guest session ID and save it in the database (because Vue Storefront does not use cookies/sessions) */
+    /* If the customer is not logged in, check for a session ID to use in order to retain cart content */
     protected function getSessionId($customer_id = null){
-        $new_session_id = md5(uniqid(rand(), true));
-        $new_session_id = substr_replace($new_session_id, $this->session_id_prefix,0, strlen($this->session_id_prefix));
-
+        $session_id = $this->getParam('session_id', true);
+        if(empty($session_id)){
+            $session_id = md5(uniqid(rand(), true));
+            $session_id = substr_replace($session_id, $this->session_id_prefix,0, strlen($this->session_id_prefix));
+        }
         if(!empty($customer_id)){
             $this->load->model('vsbridge/api');
             $customer_session_id = $this->model_vsbridge_api->getCustomerSessionId($customer_id, $this->store_id);
@@ -325,11 +328,11 @@ abstract class VsbridgeController extends Controller {
             if(!empty($customer_session_id['session_id'])){
                 return $customer_session_id['session_id'];
             }else{
-                $this->model_vsbridge_api->SetCustomerSessionId($customer_id, $this->store_id, $new_session_id);
-                return $new_session_id;
+                $this->model_vsbridge_api->SetCustomerSessionId($customer_id, $this->store_id, $session_id);
+                return $session_id;
             }
         }else{
-            return $new_session_id;
+            return $session_id;
         }
     }
 

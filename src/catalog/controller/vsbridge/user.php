@@ -43,6 +43,11 @@ class ControllerVsbridgeUser extends VsbridgeController{
             $this->load->model('account/customer');
             $this->load->model('vsbridge/api');
 
+
+            /* Load the guest session to retain the cart content */
+            $session_id = $this->getSessionId();
+            $this->loadSession($session_id);
+
             $data = array(
                 'customer_group_id' => $this->config->get('config_customer_group_id'),
                 'firstname' => $fields['customer']['firstname'],
@@ -197,7 +202,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
             if($token && $refresh_token){
                 $this->load->model('account/customer');
 
-                /* Check if the current customer has an existing session, if not create a new session ID */
+                /* Load an existing customer / guest session if possible. Otherwise, create a new session. */
                 if($session_id = $this->getSessionId($customer_info['customer_id'])){
 
                     /* Switch to the customer session */

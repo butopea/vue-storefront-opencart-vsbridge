@@ -13,6 +13,21 @@ class ControllerVsbridgeSyncSession extends VsbridgeController{
         session_start();
         $this->session->start('default', $vsbridge_session_id);
 
-        $this->response->redirect($this->url->link('checkout/cart'));
+        // to: GET parameter determining the redirection destination
+        // any other GET parameter will also be piped
+        $to = 'checkout/cart';
+        $get_params = [];
+
+        foreach($this->request->get as $k => $v) {
+            if ($k == 'to') {
+                $to = $v;
+            } elseif(!in_array($k, array('route', 'session_id'))) {
+                $get_params[] = $k . '=' . $v;
+            }
+        }
+
+        $params = implode('&', $get_params);
+
+        $this->response->redirect($this->url->link($to, $params));
     }
 }
