@@ -391,6 +391,10 @@ class ModelVsbridgeApi extends Model {
         $this->db->query("INSERT INTO `" . DB_PREFIX . "vsbridge_session` (`customer_id`, `store_id`, `session_id`) VALUES ('". (int)$customer_id ."', '". (int) $store_id ."', '". $this->db->escape($session_id) ."') ON DUPLICATE KEY UPDATE session_id = '" . $this->db->escape($session_id)  . "'");
     }
 
+    public function transferCartProducts($source_session_id, $destination_session_id, $customer_id) {
+        $this->db->query("UPDATE `" . DB_PREFIX . "cart` SET `customer_id` = '". (int)$customer_id ."', `session_id` = '". $this->db->escape($destination_session_id) ."' WHERE `session_id` = '". $this->db->escape($source_session_id) ."' AND `customer_id` = '0'");
+    }
+
     public function getCustomerCartSessionId($customer_id){
         $query = $this->db->query("SELECT DISTINCT session_id FROM `" . DB_PREFIX . "cart` WHERE customer_id = '". (int) $customer_id ."' ORDER BY cart_id DESC LIMIT 1");
 

@@ -199,11 +199,18 @@ class ControllerVsbridgeUser extends VsbridgeController{
 
             $refresh_token = $this->getToken($refresh_token_id, true);
 
+            $input = $this->getPost();
+
             if($token && $refresh_token){
                 $this->load->model('account/customer');
 
                 /* Load an existing customer / guest session if possible. Otherwise, create a new session. */
                 if($session_id = $this->getSessionId($customer_info['customer_id'])){
+
+                    /* Merge the cart items before login to the user's cart */
+                    if(!empty($input['cartId'])) {
+                        $this->model_vsbridge_api->transferCartProducts($input['cartId'], $session_id, $customer_info['customer_id']);
+                    }
 
                     /* Switch to the customer session */
                     $this->loadSession($session_id);
