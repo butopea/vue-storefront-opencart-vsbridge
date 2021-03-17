@@ -48,6 +48,9 @@ class ControllerVsbridgeUser extends VsbridgeController{
             $session_id = $this->getSessionId();
             $this->loadSession($session_id);
 
+            // Due to https://github.com/opencart/opencart/blob/master/upload/system/library/request.php#L27
+            $cleaned_password = htmlspecialchars($fields['password'], ENT_COMPAT, 'UTF-8');
+
             $data = array(
                 'customer_group_id' => $this->config->get('config_customer_group_id'),
                 'firstname' => $fields['customer']['firstname'],
@@ -56,7 +59,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
                 'telephone' => '',
                 'fax' => '',
                 'newsletter' => 0,
-                'password' =>  $fields['password'],
+                'password' =>  $cleaned_password,
                 'status' => 1,
                 'approved' => 1,
                 'country_id' => $this->config->get('config_country_id'),
@@ -270,7 +273,9 @@ class ControllerVsbridgeUser extends VsbridgeController{
             if ($customer_info && !$customer_info['approved']) {
                 $this->error[] = $this->language->get('error_approved');
             }else{
-                if (!$this->customer->login($input['username'], $input['password'])) {
+                // Due to https://github.com/opencart/opencart/blob/master/upload/system/library/request.php#L27
+                $cleaned_password = htmlspecialchars($input['password'], ENT_COMPAT, 'UTF-8');
+                if (!$this->customer->login($input['username'], $cleaned_password)) {
                     $this->error[] = $this->language->get('error_login');
 
                     $this->model_account_customer->addLoginAttempt($input['username']);
