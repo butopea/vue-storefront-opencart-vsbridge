@@ -280,6 +280,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         'minimum' => !empty($product['minimum']) ? (int) $product['minimum'] : 1,
                         'status' => (int) $product['status'],
                         'slug' => $slug,
+                        'sort_order' => (int) $product['sort_order'],
                         'tags' => $tags,
                         'url_path' => $slug,
                         'created_at' => $this->sanitizeDateTime($product['date_added']),
