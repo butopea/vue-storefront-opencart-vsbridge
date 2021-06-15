@@ -100,15 +100,15 @@ class ControllerVsbridgeCart extends VsbridgeController{
 
             $response = array();
 
-            $out_of_stock_products = array();
-
             /* If the cart exists and has items, retrieve it */
             if(!empty($cart)){
                 foreach($cart as $cart_product){
                     if(isset($cart_product['product_id']) && isset($cart_product['quantity'])){
                         $product_info = $this->model_vsbridge_api->getProductDetails($cart_product['product_id'], $this->language_id);
                         if (!$cart_product['stock']) {
-                            $out_of_stock_products[] = $product_info['model'];
+                            // Sending an HTTP-500 error causes a bug where VSF continuously makes new tokens on each page refresh
+                            // A quick fix is to remove any out of stock products from the cart to avoid this issue
+                            $this->cart->remove($cart_product['cart_id']);
                         }
                         $response[] = array(
                             'item_id' => (int)$cart_product['cart_id'],
@@ -122,13 +122,6 @@ class ControllerVsbridgeCart extends VsbridgeController{
                         );
                     }
                 }
-            }
-
-            if(!empty($out_of_stock_products)) {
-                $this->load->language('vsbridge/api');
-                $this->code = 500;
-                $this->result = $this->language->get('error_out_of_stock') . ' ' . implode(', ', $out_of_stock_products);
-                $this->sendResponse();
             }
 
             $this->result = $response;
