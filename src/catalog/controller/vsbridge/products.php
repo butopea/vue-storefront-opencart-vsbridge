@@ -296,7 +296,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                     }
 
                     foreach(array('length', 'width', 'height', 'weight') as $dimension) {
-                        $product_array[$dimension] =  (string) number_format($product[$dimension],2);
+                        $product_array[$dimension] =  (string) number_format($product[$dimension], 2, '.', '');
                     }
 
                     $weight_class =  $this->model_vsbridge_api->getWeightClass($product['weight_class_id'], $this->language_id);
