@@ -11,6 +11,12 @@ class ControllerVsbridgeSyncSession extends VsbridgeController{
         session_abort();
         session_id($vsbridge_session_id);
         session_start();
+
+        // Temporary, edge case hotfix due to https://github.com/cloudflare/cloudflare-docs/issues/17
+        // Summary: Cloudflare workers combine set-cookie headers, but Chrome >= 88 only takes the first cookie
+        // Fix: We clear previous cookies to set the session properly
+        header_remove('Set-Cookie');
+
         $this->session->start('default', $vsbridge_session_id);
 
         // to: GET parameter determining the redirection destination
