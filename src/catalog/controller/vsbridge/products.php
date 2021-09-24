@@ -315,7 +315,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
 
                     foreach($product_filters as $product_filter){
                         if(isset($product_filter['filter_group_id']) && isset($product_filter['filter_id'])){
-                            $product_array['filter_group_'.$product_filter['filter_group_id']] = (int) $product_filter['filter_id'];
+                            $product_array['filter_group_'.$product_filter['filter_group_id']][] = (int) $product_filter['filter_id'];
                         }
                     }
 
