@@ -690,6 +690,82 @@ class ControllerVsbridgeUser extends VsbridgeController{
     }
 
     /*
+     * GET /vsbridge/user/getWishlistItems
+     * Get the user wishlist items from server side
+     *
+     * GET PARAMS:
+     * token - user token returned from POST /vsbridge/user/getWishlistItems
+     */
+
+    public function getWishlistItems(){
+        $token = $this->getParam('token');
+        $this->validateCustomerToken($token);
+
+        $this->load->model('account/wishlist');
+        $this->result = $this->model_account_wishlist->getWishlist();
+    
+        $this->sendResponse();
+    }
+
+    /*
+     * GET /vsbridge/user/addWishlistItem
+     * Add wishlist item to a user from server side
+     *
+     * GET PARAMS:
+     * token - user token returned from POST /vsbridge/user/addWishlistItem
+     */
+
+    public function addWishlistItem(){
+        $token = $this->getParam('token');
+        $this->validateCustomerToken($token);
+
+        $input = $this->getPost();
+        if(empty($input['product_id'])) {
+            $this->error[] = $this->language->get('error_product_id');
+        }
+
+        if(!empty($this->error)){
+            $this->code = 500;
+            $this->result = implode(' ', $this->error);
+            $this->sendResponse();
+        }
+
+        $this->load->model('account/wishlist');
+        $this->model_account_wishlist->addWishlist($input['product_id']);
+    
+        $this->sendResponse();
+    }
+
+    /*
+     * GET /vsbridge/user/deleteWishlistItem
+     * Delete wishlist item from a user from server side
+     *
+     * GET PARAMS:
+     * token - user token returned from POST /vsbridge/user/deleteWishlistItem
+     */
+
+    public function deleteWishlistItem(){
+        $token = $this->getParam('token');
+        $this->validateCustomerToken($token);
+
+        $input = $this->getPost();
+        if(empty($input['product_id'])) {
+            $this->error[] = $this->language->get('error_product_id');
+        }
+
+        if(!empty($this->error)){
+            $this->code = 500;
+            $this->result = implode(' ', $this->error);
+            $this->sendResponse();
+        }
+
+        $this->load->model('account/wishlist');
+        $this->model_account_wishlist->deleteWishlist($input['product_id']);
+
+        $this->sendResponse();
+    }
+
+    /*
      * GET /vsbridge/user/me
      * Gets the User profile for the currently authorized user. It's called after POST /vsbridge/user/login successful call.
      *
