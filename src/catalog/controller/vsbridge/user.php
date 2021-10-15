@@ -703,7 +703,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
 
         $this->load->model('account/wishlist');
         $this->result = $this->model_account_wishlist->getWishlist();
-    
+
         $this->sendResponse();
     }
 
@@ -720,7 +720,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
         $this->validateCustomerToken($token);
 
         $input = $this->getPost();
-        if(empty($input['product_id'])) {
+        if(empty($input['product_id']) || !is_numeric($input['product_id'])) {
             $this->error[] = $this->language->get('error_product_id');
         }
 
@@ -732,6 +732,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
 
         $this->load->model('account/wishlist');
         $this->model_account_wishlist->addWishlist($input['product_id']);
+        $this->result = $this->model_account_wishlist->getWishlist();
     
         $this->sendResponse();
     }
@@ -749,7 +750,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
         $this->validateCustomerToken($token);
 
         $input = $this->getPost();
-        if(empty($input['product_id'])) {
+        if(empty($input['product_id']) || !is_numeric($input['product_id'])) {
             $this->error[] = $this->language->get('error_product_id');
         }
 
@@ -761,6 +762,7 @@ class ControllerVsbridgeUser extends VsbridgeController{
 
         $this->load->model('account/wishlist');
         $this->model_account_wishlist->deleteWishlist($input['product_id']);
+        $this->result = $this->model_account_wishlist->getWishlist();
 
         $this->sendResponse();
     }
