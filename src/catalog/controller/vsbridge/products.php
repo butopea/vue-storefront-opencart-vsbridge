@@ -382,6 +382,11 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                     // Add the 'sale' label if the product is on sale
                     $product_array['sale'] = isset($special_price_incl_tax) ? '1' : '0';
 
+                    // Discount percentage
+                    $product_array['discount'] = round(
+                        100 - (($product_array['final_price'] / $product_array['regular_price']) * 100)
+                    );
+
                     array_push($response, $product_array);
                 }
             }
