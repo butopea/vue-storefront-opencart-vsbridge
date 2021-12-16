@@ -690,19 +690,19 @@ class ControllerVsbridgeUser extends VsbridgeController{
     }
 
     /*
-     * GET /vsbridge/user/getWishlistItems
-     * Get the user wishlist items from server side
-     *
-     * GET PARAMS:
-     * token - user token returned from POST /vsbridge/user/getWishlistItems
-     */
+ * GET /vsbridge/user/getWishlistItems
+ * Get the user wishlist items from server side
+ *
+ * GET PARAMS:
+ * token - user token returned from POST /vsbridge/user/getWishlistItems
+ */
 
     public function getWishlistItems(){
         $token = $this->getParam('token');
-        $this->validateCustomerToken($token);
+        $customer_info = $this->validateCustomerToken($token);
 
-        $this->load->model('account/wishlist');
-        $this->result = $this->model_account_wishlist->getWishlist();
+        $this->load->model('vsbridge/api');
+        $this->result = $this->model_vsbridge_api->getWishlist($customer_info['customer_id']);
 
         $this->sendResponse();
     }
@@ -717,10 +717,10 @@ class ControllerVsbridgeUser extends VsbridgeController{
 
     public function addWishlistItem(){
         $token = $this->getParam('token');
-        $this->validateCustomerToken($token);
+        $customer_info = $this->validateCustomerToken($token);
 
         $input = $this->getPost();
-        if(empty($input['product_id']) || !is_numeric($input['product_id'])) {
+        if(empty($input['product_id']) || !(is_numeric($input['product_id']) || is_array($input['product_id']))) {
             $this->error[] = $this->language->get('error_product_id');
         }
 
@@ -730,10 +730,16 @@ class ControllerVsbridgeUser extends VsbridgeController{
             $this->sendResponse();
         }
 
-        $this->load->model('account/wishlist');
-        $this->model_account_wishlist->addWishlist($input['product_id']);
-        $this->result = $this->model_account_wishlist->getWishlist();
-    
+        $this->load->model('vsbridge/api');
+        if (is_array($input['product_id'])) {
+            foreach($input['product_id'] as $product_id) {
+                $this->model_vsbridge_api->addWishlist($product_id, $customer_info['customer_id']);
+            }
+        } else {
+            $this->model_vsbridge_api->addWishlist($input['product_id'], $customer_info['customer_id']);
+        }
+        $this->result = $this->model_vsbridge_api->getWishlist($customer_info['customer_id']);
+
         $this->sendResponse();
     }
 
@@ -747,10 +753,10 @@ class ControllerVsbridgeUser extends VsbridgeController{
 
     public function deleteWishlistItem(){
         $token = $this->getParam('token');
-        $this->validateCustomerToken($token);
+        $customer_info = $this->validateCustomerToken($token);
 
         $input = $this->getPost();
-        if(empty($input['product_id']) || !is_numeric($input['product_id'])) {
+        if(empty($input['product_id']) || !(is_numeric($input['product_id']) || is_array($input['product_id']))) {
             $this->error[] = $this->language->get('error_product_id');
         }
 
@@ -760,9 +766,15 @@ class ControllerVsbridgeUser extends VsbridgeController{
             $this->sendResponse();
         }
 
-        $this->load->model('account/wishlist');
-        $this->model_account_wishlist->deleteWishlist($input['product_id']);
-        $this->result = $this->model_account_wishlist->getWishlist();
+        $this->load->model('vsbridge/api');
+        if (is_array($input['product_id'])) {
+            foreach($input['product_id'] as $product_id) {
+                $this->model_vsbridge_api->deleteWishlist($product_id, $customer_info['customer_id']);
+            }
+        } else {
+            $this->model_vsbridge_api->deleteWishlist($input['product_id'], $customer_info['customer_id']);
+        }
+        $this->result = $this->model_vsbridge_api->getWishlist($customer_info['customer_id']);
 
         $this->sendResponse();
     }
