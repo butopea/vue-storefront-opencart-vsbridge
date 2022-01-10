@@ -194,7 +194,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
 
                     $stock = array();
 
-                    if(!empty($product['quantity'])){
+                    if(isset($product['quantity']) && intval($product['quantity']) > 0) {
                         $stock['is_in_stock'] = true;
                     }else{
                         $stock['is_in_stock'] = false;
