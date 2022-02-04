@@ -448,4 +448,10 @@ class ModelVsbridgeApi extends Model {
 
         return $query->row['total'];
     }
+
+    public function getLanguageCode($language_id) {
+        $query = $this->db->query("SELECT `code` FROM " . DB_PREFIX . "language WHERE language_id = '" . (int)$language_id . "' LIMIT 1");
+
+        return $query->row;
+    }
 }

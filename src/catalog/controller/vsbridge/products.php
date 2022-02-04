@@ -136,7 +136,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
         return $text;
     }
 
-    public function createSlug($product_id, $product_name) {
+    public function createSlug($product_id, $product_name, $product_model, $language_code) {
         $slug = str_replace('/','', parse_url($this->url->link('product/product', 'product_id=' . $product_id))['path']);
 
         // If there are no SEO slugs available for the product, the resulting $slug will be index.php, which is invalid.
@@ -144,7 +144,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
         $invalid_slugs = array('index.php');
 
         if(in_array($slug, $invalid_slugs) || empty($slug)) {
-            $slug = $this->slugify($product_name);
+            $slug = $this->slugify($product_name . (!empty($product_model) ? '-' . $product_model : '') . (!empty($language_code) ? '-' . $language_code : ''));
         }
 
         return $slug;
@@ -222,7 +222,10 @@ class ControllerVsbridgeProducts extends VsbridgeController{
                         }
                     }
 
-                    $slug = $this->createSlug($product['product_id'], $product['name']);
+                    $language_info = $this->model_vsbridge_api->getLanguageCode($language_id);
+                    $language_code = !empty($language_info) ? $language_info['code'] : '';
+                    $language_code = substr($language_code, 0, strpos($language_code, "-"));
+                    $slug = $this->createSlug($product['product_id'], $product['name'], $product['model'], $language_code);
 
                     $original_price_incl_tax = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->config->get('config_currency'), NULL, FALSE);
                     $original_price_excl_tax = $this->currency->format($product['price'], $this->config->get('config_currency'), NULL, FALSE);
