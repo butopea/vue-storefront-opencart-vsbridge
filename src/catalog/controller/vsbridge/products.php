@@ -144,7 +144,7 @@ class ControllerVsbridgeProducts extends VsbridgeController{
         $invalid_slugs = array('index.php');
 
         if(in_array($slug, $invalid_slugs) || empty($slug)) {
-            $slug = $this->slugify($product_name . '-' . $product_model . '-' . $language_code);
+            $slug = $this->slugify($product_name . (!empty($product_model) ? '-' . $product_model : '') . (!empty($language_code) ? '-' . $language_code : ''));
         }
 
         return $slug;
